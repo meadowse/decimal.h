@@ -105,7 +105,7 @@ START_TEST(s21_trun_6) {
     src1.bits[0] = 0xFF837E4F;
     s21_decimal result = s21_truncate(src1);
     s21_decimal result_origin;
-    result_origin.value_type = s21_NORMAL_VALUE;
+    // result_origin.value_type = s21_NORMAL_VALUE;
     result_origin.bits[3] = 0x80000000;
     result_origin.bits[2] = 0;
     result_origin.bits[1] = 0x4;
@@ -125,7 +125,7 @@ START_TEST(s21_trun_7) {
     src1.bits[3] = 0b00000000000010010000000000000000;
     s21_decimal result = s21_truncate(src1);
     s21_decimal result_origin;
-    result_origin.value_type = s21_NORMAL_VALUE;
+    // result_origin.value_type = s21_NORMAL_VALUE;
     result_origin.bits[3] = 0;
     result_origin.bits[2] = 0;
     result_origin.bits[1] = 0;
@@ -429,7 +429,7 @@ START_TEST(s21_floor_7) {
     src1.bits[3] = 0b00000000000001110000000000000000;
     s21_decimal result = s21_floor(src1);
     s21_decimal result_origin;
-    result_origin.value_type = s21_NORMAL_VALUE;
+    // result_origin.value_type = s21_NORMAL_VALUE;
     result_origin.bits[3] = 0;
     result_origin.bits[2] = 0;
     result_origin.bits[1] = 0b00000000000000000000001000010010;
