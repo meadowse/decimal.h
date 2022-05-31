@@ -31,8 +31,6 @@ typedef union {
 
 s21_decimal s21_add(s21_decimal, s21_decimal);
 s21_decimal s21_sub(s21_decimal, s21_decimal);
-// s21_decimal s21_mul(s21_decimal, s21_decimal);
-// s21_decimal s21_div(s21_decimal, s21_decimal);
 s21_decimal s21_mod(s21_decimal, s21_decimal);
 s21_decimal s21_floor(s21_decimal);
 s21_decimal s21_round(s21_decimal);
@@ -40,13 +38,9 @@ s21_decimal s21_truncate(s21_decimal);
 s21_decimal s21_negate(s21_decimal);
 
 int s21_is_less(s21_decimal, s21_decimal);
-// int s21_is_less_or_equal(s21_decimal, s21_decimal);
 int s21_is_greater(s21_decimal, s21_decimal);
 int s21_is_greater_or_equal(s21_decimal, s21_decimal);
 int s21_is_equal(s21_decimal, s21_decimal);
-// int s21_is_not_equal(s21_decimal, s21_decimal);
-
-// support function
 
 int get_bit(const s21_decimal decVar, int bit);
 int get_sign(const s21_decimal *varPtr);
@@ -63,7 +57,6 @@ void set_sign(s21_decimal *varPtr, int sign);
 void clear_bits(s21_decimal *varPtr);
 s21_decimal bit_addition(s21_decimal *less, s21_decimal *more);
 s21_decimal div_only_bits(s21_decimal a, s21_decimal b, s21_decimal *buf);
-// s21_decimal check_for_mul(s21_decimal number_1, s21_decimal number_2);
 s21_decimal check_for_add(s21_decimal number_1, s21_decimal number_2);
 
 #define SUCESS 0
