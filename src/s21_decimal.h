@@ -35,7 +35,7 @@ s21_decimal s21_mod(s21_decimal, s21_decimal);
 s21_decimal s21_floor(s21_decimal);
 s21_decimal s21_round(s21_decimal);
 s21_decimal s21_truncate(s21_decimal);
-s21_decimal s21_negate(s21_decimal);
+int s21_negate(s21_decimal, s21_decimal*);
 
 int s21_is_less(s21_decimal, s21_decimal);
 int s21_is_greater(s21_decimal, s21_decimal);
@@ -43,7 +43,7 @@ int s21_is_greater_or_equal(s21_decimal, s21_decimal);
 int s21_is_equal(s21_decimal, s21_decimal);
 
 int get_bit(const s21_decimal decVar, int bit);
-int get_sign(const s21_decimal *varPtr);
+int get_sign(const s21_decimal*);
 int get_scale(const s21_decimal *varPtr);
 int scale_equalize(s21_decimal *number_1, s21_decimal *number_2);
 int last_bit(s21_decimal number);

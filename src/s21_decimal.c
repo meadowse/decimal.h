@@ -40,28 +40,16 @@ void set_bit(s21_decimal *varPtr, int bit, int value) {
   }
 }
 
-/**
- * @brief Установить знак числа децимал
- * @param varPtr указатель на число децимал
- * @param sign знак (0 - число положительное, 1 - отрецательное)
- */
-void set_sign(s21_decimal *varPtr, int sign) {
-  unsigned int mask = 1u << 31;
-  if (sign != 0) {
-    varPtr->bits[3] |= mask;
+void set_sign(s21_decimal *value, int sign) {
+  if (sign == 1) {
+    value->bits[3] |= 0x80000000;
   } else {
-    varPtr->bits[3] &= ~mask;
+    value->bits[3] &= ~0x80000000;
   }
 }
 
-/**
- * @brief Проверка знака числа децимал
- * @param varPtr указатель на число децимал
- * @return значение знака числа (0 - число положительное, 1 - отрецательное)
- */
-int get_sign(const s21_decimal *varPtr) {
-  unsigned int mask = 1u << 31;
-  return !!(varPtr->bits[3] & mask);
+int get_sign(const s21_decimal *value) {
+  return !!(value->bits[3] & 0x80000000);  // use !! to get 1 in any event except 0
 }
 
 /**
@@ -772,12 +760,7 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
   return result;
 }
 
-/**
- * @brief Делает перевод из децимала в float
- * @param src Цисло децимал
- * @param dst Цисло float
- * @return Результат выполнения функции
- */
+// TODO(alex): optimiation.
 int s21_from_decimal_to_float(s21_decimal src, float *dst) {
   int result = FALSE;
   if (src.value_type == s21_NORMAL_VALUE) {
@@ -792,6 +775,10 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
     *dst *= src.bits[3] >> 31 ? -1 : 1;
     result = TRUE;
   }
+  if (src.value_type == s21_infinity)
+    *dst = 1.0 / 0.0;
+  if (src.value_type == s21_neg_infinity)
+    *dst = -1.0 / 0.0;
   return result;
 }
 
@@ -914,23 +901,19 @@ s21_decimal s21_floor(s21_decimal dec1) {
   return dec1;
 }
 
-// TODO: get_sign, nan, 
-s21_decimal s21_negate(s21_decimal decimal) {
-  if (decimal.value_type != s21_nan) {
-    set_sign(&decimal, get_sign(&decimal)^1);
-    printf("%d %d\n", decimal.value_type, s21_infinity);
-    if (decimal.value_type == s21_infinity) {
-      decimal.value_type = s21_neg_infinity;
-      //set_sign(&decimal, 1);
-    }
-
-    if (decimal.value_type == s21_neg_infinity) {
-      decimal.value_type = s21_infinity;
-      //set_sign(&decimal, 0);
+// TODO(alex): return??.
+int s21_negate(s21_decimal value, s21_decimal *result) {
+  *result = value;
+  if (result->value_type != s21_nan) {
+    set_sign(result, get_sign(result)^1);
+    if (result->value_type == s21_infinity) {
+      result->value_type = s21_neg_infinity;
+    } else {
+      if (result->value_type == s21_neg_infinity)
+        result->value_type = s21_infinity;
     }
   }
-  printf("%d %d\n", decimal.value_type, s21_infinity);
-  return decimal;
+  return 0;
 }
 
 /**
