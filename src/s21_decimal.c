@@ -97,7 +97,7 @@ void set_scale(s21_decimal *varPtr, int scale) {
 void offset_left(s21_decimal *varPtr, int value_offset) {
   int lastbit = last_bit(*varPtr);
   if (lastbit + value_offset > 95) {
-    varPtr->value_type = s21_INFINITY;
+    varPtr->value_type = s21_infinity;
     return;
   }
   for (int i = 0; i < value_offset; i++) {
@@ -249,12 +249,12 @@ s21_decimal bit_addition(s21_decimal *var1, s21_decimal *var2) {
     }
     if (i == 95 && buffer == 1 && var1->value_type != s21_ADDCODE &&
         var2->value_type != s21_ADDCODE)
-      res.value_type = s21_INFINITY;  // переполнение нужно вывести инфинити
+      res.value_type = s21_infinity;  // переполнение нужно вывести инфинити
     else
       res.value_type = s21_NORMAL_VALUE;
   }
   if (is_inf(var1, var2) != 0) {
-    res.value_type = s21_INFINITY;
+    res.value_type = s21_infinity;
   }
 
   return res;
@@ -285,7 +285,7 @@ s21_decimal check_for_add(s21_decimal number_1, s21_decimal number_2) {
   if (number_1.value_type != s21_NORMAL_VALUE &&
       number_2.value_type != s21_NORMAL_VALUE &&
       number_1.value_type != number_2.value_type) {
-    res.value_type = s21_NAN;
+    res.value_type = s21_nan;
   }
   return res;
 }
@@ -310,14 +310,14 @@ s21_decimal s21_add(s21_decimal number_1, s21_decimal number_2) {
       s21_decimal tmpRes;
       tmpRes = bit_addition(&number_1, &number_2);
 
-      if (tmpRes.value_type == s21_INFINITY && get_scale(&number_1) == 0) {
+      if (tmpRes.value_type == s21_infinity && get_scale(&number_1) == 0) {
         // значит в результате бесконечность
-        res.value_type = s21_INFINITY;
+        res.value_type = s21_infinity;
 
-      } else if (tmpRes.value_type == s21_INFINITY &&
+      } else if (tmpRes.value_type == s21_infinity &&
                  get_scale(&number_1) > 0) {
         // можем понизить скейл
-        while (res.value_type == s21_INFINITY &&
+        while (res.value_type == s21_infinity &&
                (get_scale(&number_1) > 0 && get_scale(&number_2) > 0)) {
           // оба числа делим на 10, если позволяет скейл
 
@@ -363,8 +363,8 @@ s21_decimal s21_add(s21_decimal number_1, s21_decimal number_2) {
       set_sign(&number_2, 0);
       res = s21_add(number_1, number_2);
       set_sign(&res, 1);
-      if (res.value_type == s21_INFINITY) {
-        res.value_type = s21_NEGATIVE_INFINITY;
+      if (res.value_type == s21_infinity) {
+        res.value_type = s21_neg_infinity;
         clear_bits(&res);
       }
     }
@@ -451,7 +451,7 @@ int is_NAN(s21_decimal *dec1, s21_decimal *dec2) {
   int vt_dec1 = dec1->value_type;
   int vt_dec2 = dec2->value_type;
 
-  return (vt_dec1 == s21_NAN || vt_dec2 == s21_NAN) ? TRUE : FALSE;
+  return (vt_dec1 == s21_nan || vt_dec2 == s21_nan) ? TRUE : FALSE;
 }
 
 /**
@@ -466,11 +466,11 @@ int is_inf(s21_decimal *dec1, s21_decimal *dec2) {
   int vt_dec1 = dec1->value_type;
   int vt_dec2 = dec2->value_type;
 
-  if (vt_dec1 == s21_INFINITY && vt_dec2 != s21_INFINITY) {
+  if (vt_dec1 == s21_infinity && vt_dec2 != s21_infinity) {
     who_is_inf = 1;
-  } else if (vt_dec1 != s21_INFINITY && vt_dec2 == s21_INFINITY) {
+  } else if (vt_dec1 != s21_infinity && vt_dec2 == s21_infinity) {
     who_is_inf = -1;
-  } else if (vt_dec1 == s21_INFINITY && vt_dec2 == s21_INFINITY) {
+  } else if (vt_dec1 == s21_infinity && vt_dec2 == s21_infinity) {
     who_is_inf = 2;
   }
   return who_is_inf;
@@ -488,13 +488,13 @@ int is_neg_inf(s21_decimal *dec1, s21_decimal *dec2) {
   int vt_dec1 = dec1->value_type;
   int vt_dec2 = dec2->value_type;
 
-  if (vt_dec1 == s21_NEGATIVE_INFINITY && vt_dec2 != s21_NEGATIVE_INFINITY) {
+  if (vt_dec1 == s21_neg_infinity && vt_dec2 != s21_neg_infinity) {
     who_is_inf = 1;
   }
-  if (vt_dec1 != s21_NEGATIVE_INFINITY && vt_dec2 == s21_NEGATIVE_INFINITY) {
+  if (vt_dec1 != s21_neg_infinity && vt_dec2 == s21_neg_infinity) {
     who_is_inf = -1;
   }
-  if (vt_dec1 == s21_NEGATIVE_INFINITY && vt_dec2 == s21_NEGATIVE_INFINITY) {
+  if (vt_dec1 == s21_neg_infinity && vt_dec2 == s21_neg_infinity) {
     who_is_inf = 2;
   }
 
@@ -743,11 +743,11 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
   int result = FALSE, sign = getFloatSign(&src), exp = getFloatExp(&src);
 
   if (isinf(src) && !sign)
-    dst->value_type = s21_INFINITY;
+    dst->value_type = s21_infinity;
   else if (isinf(src) && sign)
-    dst->value_type = s21_NEGATIVE_INFINITY;
+    dst->value_type = s21_neg_infinity;
   else if (isnan(src))
-    dst->value_type = s21_NAN;
+    dst->value_type = s21_nan;
 
   if (dst && dst->value_type == s21_NORMAL_VALUE && src != 0) {
     double temp = (double)fabs(src);
@@ -914,31 +914,23 @@ s21_decimal s21_floor(s21_decimal dec1) {
   return dec1;
 }
 
-/**
- * @brief Смена знака числа
- * @param dec1 Число, которому меняют знак
- * @return Число с измененным знаком
- */
-s21_decimal s21_negate(s21_decimal dec1) {
-  int vt_dec1 = dec1.value_type;
-
-  if (vt_dec1 != s21_NAN) {
-    int sign = get_sign(&dec1);
-
-    if (!sign) set_sign(&dec1, 1);
-    if (sign) set_sign(&dec1, 0);
-
-    if (vt_dec1 == s21_INFINITY) {
-      dec1.value_type = s21_NEGATIVE_INFINITY;
-      set_sign(&dec1, 1);
+// TODO: get_sign, nan, 
+s21_decimal s21_negate(s21_decimal decimal) {
+  if (decimal.value_type != s21_nan) {
+    set_sign(&decimal, get_sign(&decimal)^1);
+    printf("%d %d\n", decimal.value_type, s21_infinity);
+    if (decimal.value_type == s21_infinity) {
+      decimal.value_type = s21_neg_infinity;
+      //set_sign(&decimal, 1);
     }
 
-    if (vt_dec1 == s21_NEGATIVE_INFINITY) {
-      dec1.value_type = s21_INFINITY;
-      set_sign(&dec1, 0);
+    if (decimal.value_type == s21_neg_infinity) {
+      decimal.value_type = s21_infinity;
+      //set_sign(&decimal, 0);
     }
   }
-  return dec1;
+  printf("%d %d\n", decimal.value_type, s21_infinity);
+  return decimal;
 }
 
 /**

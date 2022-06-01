@@ -158,7 +158,7 @@ START_TEST(s21_trun_9) {
     float a = 1.0 / 0.0;
     s21_from_float_to_decimal(a, &src1);
     s21_decimal res_od = s21_truncate(src1);
-    ck_assert_float_eq(res_od.value_type, s21_INFINITY);
+    ck_assert_float_eq(res_od.value_type, s21_infinity);
 }
 END_TEST
 
@@ -300,7 +300,7 @@ START_TEST(s21_round_8) {
     float a = -1.0 / 0.0;
     s21_from_float_to_decimal(a, &src1);
     s21_decimal res_od = s21_round(src1);
-    ck_assert_float_eq(res_od.value_type, s21_NEGATIVE_INFINITY);
+    ck_assert_float_eq(res_od.value_type, s21_neg_infinity);
 }
 END_TEST
 
@@ -442,40 +442,66 @@ START_TEST(s21_floor_8) {
     float a = 0.0 / 0.0;
     s21_from_float_to_decimal(a, &src1);
     s21_decimal res_od = s21_floor(src1);
-    ck_assert_float_eq(res_od.value_type, s21_NAN);
+    ck_assert_float_eq(res_od.value_type, s21_nan);
 }
 END_TEST
 
-START_TEST(s21_negate_1) {
-    int a = 10;
-    int res_a = 0;
-    s21_decimal src;
-    s21_from_int_to_decimal(a, &src);
-    s21_decimal res = s21_negate(src);
-    s21_from_decimal_to_int(res, &res_a);
-    ck_assert_int_eq(-10, res_a);
+START_TEST(negate1) {
+    int int_result = 0;
+    s21_decimal source;
+    s21_from_int_to_decimal(1, &source);
+    s21_decimal result = s21_negate(source);
+    s21_from_decimal_to_int(result, &int_result);
+    ck_assert_int_eq(-1, int_result);
 }
 END_TEST
-START_TEST(s21_negate_2) {
-    float a = 10.12345;
-    float res_a = 0;
-    s21_decimal src;
-    s21_from_float_to_decimal(a, &src);
-    s21_decimal res = s21_negate(src);
-    s21_from_decimal_to_float(res, &res_a);
-    ck_assert_float_eq(-10.12345, res_a);
+START_TEST(negate2) {
+    float f_result = 0;
+    s21_decimal source;
+    s21_from_float_to_decimal(123.456, &source);
+    s21_decimal result = s21_negate(source);
+    s21_from_decimal_to_float(result, &f_result);
+    ck_assert_float_eq(-123.456, f_result);
 }
 END_TEST
-START_TEST(s21_negate_3) {
-    float a = 10.1234e5;
-    float res_a = 0;
-    s21_decimal src;
-    s21_from_float_to_decimal(a, &src);
-    s21_decimal res = s21_negate(src);
-    s21_from_decimal_to_float(res, &res_a);
-    ck_assert_float_eq(-10.1234e5, res_a);
+START_TEST(negate3) {
+    float f_result = 0;
+    s21_decimal source;
+    s21_from_float_to_decimal(-123.456e7, &source);
+    s21_decimal result = s21_negate(source);
+    s21_from_decimal_to_float(result, &f_result);
+    ck_assert_float_eq(123.456e7, f_result);
 }
 END_TEST
+START_TEST(negate4) {
+    int int_result = 0;
+    s21_decimal source;
+    s21_from_int_to_decimal(0, &source);
+    s21_decimal result = s21_negate(source);
+    s21_from_decimal_to_int(result, &int_result);
+    ck_assert_int_eq(0, int_result);
+}
+END_TEST
+START_TEST(negate5) {
+    float f_result = 0;
+    s21_decimal source;
+    s21_from_float_to_decimal(1.0 / 0.0, &source);
+    s21_decimal result = s21_negate(source);
+    printf("source.value_type %d %d %f\n", source.value_type, result.value_type, f_result);
+    s21_from_decimal_to_float(result, &f_result);
+    ck_assert_float_eq(s21_neg_infinity, result.value_type);
+}
+END_TEST
+
+
+// START_TEST(s21_trun_9) {
+//     s21_decimal src1;
+//     float a = 1.0 / 0.0;
+//     s21_from_float_to_decimal(a, &src1);
+//     s21_decimal res_od = s21_truncate(src1);
+//     ck_assert_float_eq(res_od.value_type, s21_infinity);
+// }
+// END_TEST
 
 int main(void) {
     Suite *s1 = suite_create("Suite");
@@ -512,9 +538,11 @@ int main(void) {
     tcase_add_test(tc1_1, s21_floor_7);
     tcase_add_test(tc1_1, s21_floor_8);
 
-    tcase_add_test(tc1_1, s21_negate_1);
-    tcase_add_test(tc1_1, s21_negate_2);
-    tcase_add_test(tc1_1, s21_negate_3);
+    tcase_add_test(tc1_1, negate1);
+    tcase_add_test(tc1_1, negate2);
+    tcase_add_test(tc1_1, negate3);
+    tcase_add_test(tc1_1, negate4);
+    tcase_add_test(tc1_1, negate5);
 
     srunner_run_all(sr, CK_ENV);
     srunner_free(sr);
