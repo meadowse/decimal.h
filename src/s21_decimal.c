@@ -7,7 +7,7 @@
  */
 void init_struct(s21_decimal *varPtr) {
   clear_bits(varPtr);
-  varPtr->value_type = s21_NORMAL_VALUE;
+  varPtr->value_type = s21_usual;
 }
 
 /**
@@ -40,7 +40,7 @@ void set_bit(s21_decimal *varPtr, int bit, int value) {
   }
 }
 
-void set_sign(s21_decimal *value, int sign) {
+void s21_setsign(s21_decimal *value, int sign) {
   if (sign == 1) {
     value->bits[3] |= 0x80000000;
   } else {
@@ -48,7 +48,7 @@ void set_sign(s21_decimal *value, int sign) {
   }
 }
 
-int get_sign(const s21_decimal *value) {
+int s21_getsign(const s21_decimal *value) {
   return !!(value->bits[3] & 0x80000000);  // use !! to get 1 in any event except 0
 }
 
@@ -117,7 +117,7 @@ int last_bit(s21_decimal number) {
  */
 void convert_to_addcode(s21_decimal *number_1) {
   s21_decimal res;
-  s21_decimal add = {{1, 0, 0, 0}, s21_NORMAL_VALUE};
+  s21_decimal add = {{1, 0, 0, 0}, s21_usual};
 
   number_1->bits[0] = ~number_1->bits[0];
   number_1->bits[1] = ~number_1->bits[1];
@@ -160,7 +160,7 @@ int scale_equalize(s21_decimal *number_1, s21_decimal *number_2) {
 
   // уравнивание скейлов
   while (get_scale(number_1) != get_scale(number_2)) {
-    if (tmp.value_type == s21_NORMAL_VALUE) {
+    if (tmp.value_type == s21_usual) {
       // по умолчанию двигается в сторону увеличения скейла
 
       scaleSmall = get_scale(smaller);
@@ -171,7 +171,7 @@ int scale_equalize(s21_decimal *number_1, s21_decimal *number_2) {
       offset_left(&tmp1, 1);
       offset_left(&tmp2, 3);
       tmp = bit_addition(&tmp1, &tmp2);  // эквивалентно умножению на 10
-      if (tmp.value_type == s21_NORMAL_VALUE) {
+      if (tmp.value_type == s21_usual) {
         bits_copy(tmp, smaller);
         set_scale(smaller, scaleSmall + 1);
       }
@@ -179,10 +179,10 @@ int scale_equalize(s21_decimal *number_1, s21_decimal *number_2) {
       // в противном случае уменьшение скейла
 
       s21_decimal remainder;
-      s21_decimal ten = {{10, 0, 0, 0}, s21_NORMAL_VALUE};
+      s21_decimal ten = {{10, 0, 0, 0}, s21_usual};
 
       s21_decimal tmpDiv = div_only_bits(*bigger, ten, &remainder);
-      s21_decimal zero = {{0, 0, 0, 0}, s21_NORMAL_VALUE};
+      s21_decimal zero = {{0, 0, 0, 0}, s21_usual};
       if (zero_check(tmpDiv, zero) == 1) {
         // tmpDiv не обрезался по самые гланды
         bits_copy(tmpDiv, bigger);
@@ -205,7 +205,7 @@ int scale_equalize(s21_decimal *number_1, s21_decimal *number_2) {
  * @return s21_decimal результат сложения
  */
 s21_decimal bit_addition(s21_decimal *var1, s21_decimal *var2) {
-  s21_decimal res = {{0, 0, 0, 0}, s21_NORMAL_VALUE};
+  s21_decimal res = {{0, 0, 0, 0}, s21_usual};
   int buffer = 0;
 
   for (int i = 0; i < 96; i++) {
@@ -239,7 +239,7 @@ s21_decimal bit_addition(s21_decimal *var1, s21_decimal *var2) {
         var2->value_type != s21_ADDCODE)
       res.value_type = s21_infinity;  // переполнение нужно вывести инфинити
     else
-      res.value_type = s21_NORMAL_VALUE;
+      res.value_type = s21_usual;
   }
   if (is_inf(var1, var2) != 0) {
     res.value_type = s21_infinity;
@@ -256,7 +256,7 @@ s21_decimal bit_addition(s21_decimal *var1, s21_decimal *var2) {
  * @return s21_decimal число в выставленным value_type
  */
 s21_decimal check_for_add(s21_decimal number_1, s21_decimal number_2) {
-  s21_decimal res = {{0, 0, 0, 0}, s21_NORMAL_VALUE};
+  s21_decimal res = {{0, 0, 0, 0}, s21_usual};
   /*
   num1      num2
   +inf      +-normal  = +inf    - в простой проверке
@@ -270,8 +270,8 @@ s21_decimal check_for_add(s21_decimal number_1, s21_decimal number_2) {
                        ? number_1.value_type
                        : number_2.value_type;
 
-  if (number_1.value_type != s21_NORMAL_VALUE &&
-      number_2.value_type != s21_NORMAL_VALUE &&
+  if (number_1.value_type != s21_usual &&
+      number_2.value_type != s21_usual &&
       number_1.value_type != number_2.value_type) {
     res.value_type = s21_nan;
   }
@@ -287,8 +287,8 @@ s21_decimal check_for_add(s21_decimal number_1, s21_decimal number_2) {
 s21_decimal s21_add(s21_decimal number_1, s21_decimal number_2) {
   s21_decimal res = check_for_add(number_1, number_2);
 
-  if (res.value_type == s21_NORMAL_VALUE || res.value_type == s21_ADDCODE) {
-    if (!get_sign(&number_1) && !get_sign(&number_2)) {
+  if (res.value_type == s21_usual || res.value_type == s21_ADDCODE) {
+    if (!s21_getsign(&number_1) && !s21_getsign(&number_2)) {
       //  оба числа положительных
 
       if (get_scale(&number_1) != get_scale(&number_2)) {
@@ -309,13 +309,13 @@ s21_decimal s21_add(s21_decimal number_1, s21_decimal number_2) {
                (get_scale(&number_1) > 0 && get_scale(&number_2) > 0)) {
           // оба числа делим на 10, если позволяет скейл
 
-          s21_decimal ten = {{10, 0, 0, 0}, s21_NORMAL_VALUE};
+          s21_decimal ten = {{10, 0, 0, 0}, s21_usual};
           s21_decimal remainder1, remainder2;
           s21_decimal tmpDiv1 = div_only_bits(number_1, ten, &remainder1);
           s21_decimal tmpDiv2 = div_only_bits(number_2, ten, &remainder2);
 
           // обезопасимся от обнуления
-          s21_decimal zero = {{0, 0, 0, 0}, s21_NORMAL_VALUE};
+          s21_decimal zero = {{0, 0, 0, 0}, s21_usual};
 
           zero_check(tmpDiv1, zero) == 1 ? bits_copy(tmpDiv1, &number_1)
                                          : bits_copy(remainder1, &number_1);
@@ -333,24 +333,24 @@ s21_decimal s21_add(s21_decimal number_1, s21_decimal number_2) {
         res.bits[3] = number_1.bits[3];
       }
 
-    } else if (get_sign(&number_1) && !get_sign(&number_2)) {
+    } else if (s21_getsign(&number_1) && !s21_getsign(&number_2)) {
       // 1 число отрецательное 2 число положительное
       // вызывается функция вычитания которая
       // создает доп код и сново вызывает сложение
-      set_sign(&number_1, 0);
+      s21_setsign(&number_1, 0);
       res = s21_sub(number_2, number_1);
 
-    } else if (!get_sign(&number_1) && get_sign(&number_2)) {
+    } else if (!s21_getsign(&number_1) && s21_getsign(&number_2)) {
       // 1 полож 2 отрец
-      set_sign(&number_2, 0);
+      s21_setsign(&number_2, 0);
       res = s21_sub(number_1, number_2);
 
     } else {
       // оба отрицательных
-      set_sign(&number_1, 0);
-      set_sign(&number_2, 0);
+      s21_setsign(&number_1, 0);
+      s21_setsign(&number_2, 0);
       res = s21_add(number_1, number_2);
-      set_sign(&res, 1);
+      s21_setsign(&res, 1);
       if (res.value_type == s21_infinity) {
         res.value_type = s21_neg_infinity;
         clear_bits(&res);
@@ -359,7 +359,7 @@ s21_decimal s21_add(s21_decimal number_1, s21_decimal number_2) {
   }
 
   if (res.value_type == s21_ADDCODE) {
-    res.value_type = s21_NORMAL_VALUE;
+    res.value_type = s21_usual;
   }
 
   return res;
@@ -372,12 +372,12 @@ s21_decimal s21_add(s21_decimal number_1, s21_decimal number_2) {
  * @return Возвращает разницу
  */
 s21_decimal s21_sub(s21_decimal number_1, s21_decimal number_2) {
-  s21_decimal res = {{0, 0, 0, 0}, s21_NORMAL_VALUE};
+  s21_decimal res = {{0, 0, 0, 0}, s21_usual};
 
   res.value_type =
       number_1.value_type ? number_1.value_type : number_2.value_type;
 
-  if (res.value_type == s21_NORMAL_VALUE) {
+  if (res.value_type == s21_usual) {
     if (get_scale(&number_1) != get_scale(&number_2)) {
       scale_equalize(&number_1, &number_2);
     }
@@ -385,13 +385,13 @@ s21_decimal s21_sub(s21_decimal number_1, s21_decimal number_2) {
     int resultSign;
 
     // проверяем на знаки
-    if (get_sign(&number_1) != get_sign(&number_2)) {
+    if (s21_getsign(&number_1) != s21_getsign(&number_2)) {
       // знаки разные - ситуация вырождается в ++ или --
-      resultSign = get_sign(&number_1);
-      set_sign(&number_1, 0);
-      set_sign(&number_2, 0);
+      resultSign = s21_getsign(&number_1);
+      s21_setsign(&number_1, 0);
+      s21_setsign(&number_2, 0);
       res = s21_add(number_1, number_2);
-      set_sign(&res, resultSign);
+      s21_setsign(&res, resultSign);
 
     } else {
       // знаки одинаковые - ситуация вырождается в -+ или +-
@@ -400,10 +400,10 @@ s21_decimal s21_sub(s21_decimal number_1, s21_decimal number_2) {
 
       } else {
         // числа разные, значит нужно знать какой знак проставлять и тд
-        int sign1 = get_sign(&number_1);
-        int sign2 = get_sign(&number_2);
-        set_sign(&number_1, 0);
-        set_sign(&number_2, 0);
+        int sign1 = s21_getsign(&number_1);
+        int sign2 = s21_getsign(&number_2);
+        s21_setsign(&number_1, 0);
+        s21_setsign(&number_2, 0);
         s21_decimal *smallPtr, *bigPtr;
 
         // кто из них больше по модулю
@@ -421,7 +421,7 @@ s21_decimal s21_sub(s21_decimal number_1, s21_decimal number_2) {
         // знак
         convert_to_addcode(smallPtr);
         res = s21_add(*smallPtr, *bigPtr);
-        set_sign(&res, resultSign);
+        s21_setsign(&res, resultSign);
       }
     }
   }
@@ -498,8 +498,8 @@ int is_neg_inf(s21_decimal *dec1, s21_decimal *dec2) {
  */
 int is_negative(s21_decimal *dec1, s21_decimal *dec2) {
   int who_is_negative = 0;
-  int sign_dec1 = get_sign(dec1);
-  int sign_dec2 = get_sign(dec2);
+  int sign_dec1 = s21_getsign(dec1);
+  int sign_dec2 = s21_getsign(dec2);
 
   if (!sign_dec1 && sign_dec2) who_is_negative = 1;
   if (sign_dec1 && !sign_dec2) who_is_negative = -1;
@@ -579,7 +579,7 @@ int s21_is_greater(s21_decimal dec1, s21_decimal dec2) {
     if (bit_dec2 && !bit_dec1) is_greater = FALSE;
 
     if (is_greater != -1) {
-      if (get_sign(&dec1) && get_sign(&dec2)) is_greater = !is_greater;
+      if (s21_getsign(&dec1) && s21_getsign(&dec2)) is_greater = !is_greater;
     }
   }
 
@@ -677,11 +677,11 @@ int s21_from_int_to_decimal(int src, s21_decimal *dst) {
     dst->bits[0] = dst->bits[1] = dst->bits[2] = dst->bits[3] = 0;
     dst->value_type = 0;
     if (src < 0) {
-      set_sign(dst, 1);
+      s21_setsign(dst, 1);
       src *= -1;
     }
     dst->bits[0] = src;
-    dst->value_type = s21_NORMAL_VALUE;
+    dst->value_type = s21_usual;
   } else {
     result = FALSE;
   }
@@ -696,9 +696,9 @@ int s21_from_int_to_decimal(int src, s21_decimal *dst) {
  */
 int s21_from_decimal_to_int(s21_decimal src, int *dst) {
   int result = 1;
-  if (src.value_type == s21_NORMAL_VALUE) {
+  if (src.value_type == s21_usual) {
     *dst = src.bits[0];
-    *dst *= get_sign(&src) ? -1 : 1;
+    *dst *= s21_getsign(&src) ? -1 : 1;
     *dst /= (int)pow(10, get_scale(&src));
     result = 0;
   }
@@ -727,7 +727,7 @@ int getFloatExp(float *src) { return ((*(int *)src & ~SIGN) >> 23) - 127; }
  */
 int s21_from_float_to_decimal(float src, s21_decimal *dst) {
   dst->bits[0] = dst->bits[1] = dst->bits[2] = dst->bits[3] = 0;
-  dst->value_type = s21_NORMAL_VALUE;
+  dst->value_type = s21_usual;
   int result = FALSE, sign = getFloatSign(&src), exp = getFloatExp(&src);
 
   if (isinf(src) && !sign)
@@ -737,7 +737,7 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
   else if (isnan(src))
     dst->value_type = s21_nan;
 
-  if (dst && dst->value_type == s21_NORMAL_VALUE && src != 0) {
+  if (dst && dst->value_type == s21_usual && src != 0) {
     double temp = (double)fabs(src);
     int off = 0;
     for (; off < 28 && (int)temp / (int)pow(2, 21) == 0; temp *= 10, off++) {
@@ -763,7 +763,7 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
 // TODO(alex): optimiation.
 int s21_from_decimal_to_float(s21_decimal src, float *dst) {
   int result = FALSE;
-  if (src.value_type == s21_NORMAL_VALUE) {
+  if (src.value_type == s21_usual) {
     double temp = 0;
     int off = 0;
     for (int i = 0; i < 96; i++)
@@ -779,6 +779,8 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
     *dst = 1.0 / 0.0;
   if (src.value_type == s21_neg_infinity)
     *dst = -1.0 / 0.0;
+  if (src.value_type == s21_nan)
+    *dst = 0.0 / 0.0;
   return result;
 }
 
@@ -816,14 +818,14 @@ s21_decimal div_only_bits(s21_decimal number_1, s21_decimal number_2,
  * @return число децимал
  */
 s21_decimal s21_truncate(s21_decimal number_1) {
-  s21_decimal ten = {{10, 0, 0, 0}, s21_NORMAL_VALUE};
+  s21_decimal ten = {{10, 0, 0, 0}, s21_usual};
   s21_decimal res = {{0, 0, 0, 0}, 0};
-  s21_decimal tmp = {{0, 0, 0, 0}, s21_NORMAL_VALUE};
+  s21_decimal tmp = {{0, 0, 0, 0}, s21_usual};
 
-  int sign_number_1 = get_sign(&number_1);
+  int sign_number_1 = s21_getsign(&number_1);
   int scale = get_scale(&number_1);
 
-  int valid_value = (number_1.value_type == s21_NORMAL_VALUE ? 1 : 0);
+  int valid_value = (number_1.value_type == s21_usual ? 1 : 0);
 
   if (!scale && valid_value) {
     res = number_1;
@@ -836,7 +838,7 @@ s21_decimal s21_truncate(s21_decimal number_1) {
     res = number_1;
   }
 
-  if (sign_number_1 && valid_value) set_sign(&res, 1);
+  if (sign_number_1 && valid_value) s21_setsign(&res, 1);
 
   return res;
 }
@@ -847,14 +849,14 @@ s21_decimal s21_truncate(s21_decimal number_1) {
  * @return Округленный децимал
  */
 s21_decimal s21_round(s21_decimal dec1) {
-  int valid_value = (dec1.value_type == s21_NORMAL_VALUE ? 1 : 0);
+  int valid_value = (dec1.value_type == s21_usual ? 1 : 0);
 
-  s21_decimal res = {{0, 0, 0, 0}, s21_NORMAL_VALUE};
-  s21_decimal one = {{1, 0, 0, 0}, s21_NORMAL_VALUE};
-  s21_decimal five = {{5, 0, 0, 0}, s21_NORMAL_VALUE};
+  s21_decimal res = {{0, 0, 0, 0}, s21_usual};
+  s21_decimal one = {{1, 0, 0, 0}, s21_usual};
+  s21_decimal five = {{5, 0, 0, 0}, s21_usual};
 
-  int sign = get_sign(&dec1);
-  set_sign(&dec1, 0);
+  int sign = s21_getsign(&dec1);
+  s21_setsign(&dec1, 0);
 
   s21_decimal trunc = s21_truncate(dec1);
   s21_decimal buf = s21_sub(dec1, trunc);
@@ -866,7 +868,7 @@ s21_decimal s21_round(s21_decimal dec1) {
     if (s21_is_greater_or_equal(buf, five) == TRUE) {
       res = s21_add(res, one);
     }
-    set_sign(&res, sign);
+    s21_setsign(&res, sign);
   } else {
     res.value_type = dec1.value_type;
   }
@@ -881,12 +883,12 @@ s21_decimal s21_round(s21_decimal dec1) {
  */
 s21_decimal s21_floor(s21_decimal dec1) {
   s21_decimal dec1_copy = dec1;
-  int valid_value = (dec1.value_type == s21_NORMAL_VALUE ? 1 : 0);
-  int sign_dec1 = get_sign(&dec1);
+  int valid_value = (dec1.value_type == s21_usual ? 1 : 0);
+  int sign_dec1 = s21_getsign(&dec1);
   int scale_dec1 = get_scale(&dec1);
 
-  s21_decimal one = {{1, 0, 0, 0}, s21_NORMAL_VALUE};
-  s21_decimal ten = {{10, 0, 0, 0}, s21_NORMAL_VALUE};
+  s21_decimal one = {{1, 0, 0, 0}, s21_usual};
+  s21_decimal ten = {{10, 0, 0, 0}, s21_usual};
   s21_decimal buf;
   init_struct(&buf);
   for (int i = scale_dec1; i > 0; i--) dec1 = div_only_bits(dec1, ten, &buf);
@@ -895,7 +897,7 @@ s21_decimal s21_floor(s21_decimal dec1) {
   if (s21_is_equal(dec1, dec1_copy) == TRUE) valid_value = 0;
   if (sign_dec1 && valid_value) {
     dec1 = s21_add(dec1, one);
-    set_sign(&dec1, 1);
+    s21_setsign(&dec1, 1);
   }
 
   return dec1;
@@ -905,7 +907,7 @@ s21_decimal s21_floor(s21_decimal dec1) {
 int s21_negate(s21_decimal value, s21_decimal *result) {
   *result = value;
   if (result->value_type != s21_nan) {
-    set_sign(result, get_sign(result)^1);
+    s21_setsign(result, s21_getsign(result)^1);
     if (result->value_type == s21_infinity) {
       result->value_type = s21_neg_infinity;
     } else {
