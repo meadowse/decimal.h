@@ -34,7 +34,7 @@ s21_decimal s21_sub(s21_decimal, s21_decimal);
 s21_decimal s21_mod(s21_decimal, s21_decimal);
 s21_decimal s21_floor(s21_decimal);
 s21_decimal s21_round(s21_decimal);
-s21_decimal s21_truncate(s21_decimal);
+int s21_truncate(s21_decimal, s21_decimal*);
 int s21_negate(s21_decimal, s21_decimal*);
 
 int s21_is_less(s21_decimal, s21_decimal);

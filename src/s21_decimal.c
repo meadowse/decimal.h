@@ -812,35 +812,52 @@ s21_decimal div_only_bits(s21_decimal number_1, s21_decimal number_2,
   return res;
 }
 
-/**
- * @brief возвращает целую часть числа децимал
- * @param a число децимал
- * @return число децимал
- */
-s21_decimal s21_truncate(s21_decimal number_1) {
-  s21_decimal ten = {{10, 0, 0, 0}, s21_usual};
-  s21_decimal res = {{0, 0, 0, 0}, 0};
-  s21_decimal tmp = {{0, 0, 0, 0}, s21_usual};
+// int s21_decimal s21_truncate(s21_decimal number_1) {
+//   s21_decimal ten = {{10, 0, 0, 0}, s21_usual};
+//   s21_decimal res = {{0, 0, 0, 0}, 0};
+//   s21_decimal tmp = {{0, 0, 0, 0}, s21_usual};
 
-  int sign_number_1 = s21_getsign(&number_1);
-  int scale = get_scale(&number_1);
+//   int sign_number_1 = s21_getsign(&number_1);
+//   int scale = get_scale(&number_1);
 
-  int valid_value = (number_1.value_type == s21_usual ? 1 : 0);
+//   int valid_value = (number_1.value_type == s21_usual ? 1 : 0);
 
-  if (!scale && valid_value) {
-    res = number_1;
-  } else if (valid_value) {
+//   if (!scale && valid_value) {
+//     res = number_1;
+//   } else if (valid_value) {
+//     for (int i = scale; i > 0; i--) {
+//       res = div_only_bits(number_1, ten, &tmp);
+//       number_1 = res;
+//     }
+//   } else {
+//     res = number_1;
+//   }
+
+//   if (sign_number_1 && valid_value) s21_setsign(&res, 1);
+
+//   return res;
+// }
+
+int s21_truncate(s21_decimal value, s21_decimal *result) {
+  s21_decimal ten = {{10, 0, 0, 0}, s21_usual}, res = ten, tmp = ten;
+  int sign = s21_getsign(&value);
+  int scale = get_scale(&value);
+  int valid = (value.value_type == s21_usual ? 1 : 0);
+
+  if (!scale && valid) {
+    res = value;
+  } else if (valid) {
     for (int i = scale; i > 0; i--) {
-      res = div_only_bits(number_1, ten, &tmp);
-      number_1 = res;
+      res = div_only_bits(value, ten, &tmp);
+      value = res;
     }
   } else {
-    res = number_1;
+    res = value;
   }
 
-  if (sign_number_1 && valid_value) s21_setsign(&res, 1);
-
-  return res;
+  if (sign && valid) s21_setsign(&res, 1);
+  *result = res;
+  return 0;
 }
 
 /**
@@ -858,7 +875,8 @@ s21_decimal s21_round(s21_decimal dec1) {
   int sign = s21_getsign(&dec1);
   s21_setsign(&dec1, 0);
 
-  s21_decimal trunc = s21_truncate(dec1);
+  s21_decimal trunc;
+  s21_truncate(dec1, &trunc);
   s21_decimal buf = s21_sub(dec1, trunc);
 
   set_scale(&five, 1);
