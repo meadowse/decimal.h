@@ -923,6 +923,7 @@ s21_decimal s21_floor(s21_decimal dec1) {
 
 // TODO(alex): return??.
 int s21_negate(s21_decimal value, s21_decimal *result) {
+  int ret = 0;
   *result = value;
   if (result->value_type != s21_nan) {
     s21_setsign(result, s21_getsign(result)^1);
@@ -932,8 +933,10 @@ int s21_negate(s21_decimal value, s21_decimal *result) {
       if (result->value_type == s21_neg_infinity)
         result->value_type = s21_infinity;
     }
+  } else {
+    ret = 1;
   }
-  return 0;
+  return ret;
 }
 
 /**
