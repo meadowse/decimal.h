@@ -2,7 +2,7 @@
 #include "s21_decimal.h"
 
 START_TEST(truncate1) {
-    s21_decimal src,result, result2;
+    s21_decimal src, result, result2;
     src.value_type = s21_usual;
     src.bits[3] = 0x000A0000;  // 1844674432
     src.bits[2] = 0x0;
@@ -156,6 +156,46 @@ START_TEST(truncate10) {
     s21_truncate(src, &res);
     s21_from_decimal_to_float(res, &f_result);
     ck_assert_float_eq(f_result, 1.0);
+}
+END_TEST
+START_TEST(truncate11) {
+    float f_result;
+    s21_decimal src, res;
+    s21_from_float_to_decimal(-2.1, &src);
+    s21_truncate(src, &res);
+    s21_from_decimal_to_float(res, &f_result);
+    ck_assert_float_eq(f_result, -2.0);
+}
+END_TEST
+START_TEST(truncate12) {
+    float f_result, a = 1*0.0, b = 0.0*2;
+    s21_decimal src, res;
+    s21_from_float_to_decimal(a/b, &src);
+    ck_assert_int_eq(1, s21_truncate(src, &res));
+    s21_from_decimal_to_float(res, &f_result);
+    ck_assert_float_nan(f_result);
+}
+END_TEST
+START_TEST(truncate13) {
+    float f_result;
+    s21_decimal src, res;
+    s21_from_float_to_decimal(1.0/0.0, &src);
+    ck_assert_int_eq(1, s21_truncate(src, &res));
+    s21_from_decimal_to_float(res, &f_result);
+    ck_assert_float_eq(s21_infinity, res.value_type);
+    ck_assert_float_eq(f_result, 1.0/0.0);
+    ck_assert_float_infinite(f_result);
+}
+END_TEST
+START_TEST(truncate14) {
+    float f_result;
+    s21_decimal src, res;
+    s21_from_float_to_decimal(-1.0/0.0, &src);
+    ck_assert_int_eq(1, s21_truncate(src, &res));
+    s21_from_decimal_to_float(res, &f_result);
+    ck_assert_float_eq(s21_neg_infinity, res.value_type);
+    ck_assert_float_eq(f_result, -1.0/0.0);
+    ck_assert_float_infinite(f_result);
 }
 END_TEST
 
@@ -530,6 +570,10 @@ int main(void) {
     tcase_add_test(tc1_1, truncate8);
     tcase_add_test(tc1_1, truncate9);
     tcase_add_test(tc1_1, truncate10);
+    tcase_add_test(tc1_1, truncate11);
+    tcase_add_test(tc1_1, truncate12);
+    tcase_add_test(tc1_1, truncate13);
+    tcase_add_test(tc1_1, truncate14);
 
     tcase_add_test(tc1_1, s21_round_1);
     tcase_add_test(tc1_1, s21_round_2);

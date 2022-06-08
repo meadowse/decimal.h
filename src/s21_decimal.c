@@ -2,7 +2,7 @@
 
 /**
  * @brief Временная функция для инициализаци структуры которая хранит число
- * Децимал
+ * * Децимал
  * @param varPtr указатель на число децимал
  */
 void init_struct(s21_decimal *varPtr) {
@@ -52,13 +52,8 @@ int s21_getsign(const s21_decimal *value) {
   return !!(value->bits[3] & 0x80000000);  // use !! to get 1 in any event except 0
 }
 
-/**
- * @brief Проверка степени числа децимал
- * @param varPtr указатель на число децимал
- * @return значение степени числа
- */
-int get_scale(const s21_decimal *varPtr) {
-  return (char)(varPtr->bits[3] >> 16);
+int get_scale(const s21_decimal *value) {
+  return (char)(value->bits[3] >> 16);
 }
 
 /**
@@ -763,6 +758,7 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
 // TODO(alex): optimiation.
 int s21_from_decimal_to_float(s21_decimal src, float *dst) {
   int result = FALSE;
+  float a = 1*0.0, b = 0.0*2;
   if (src.value_type == s21_usual) {
     double temp = 0;
     int off = 0;
@@ -780,7 +776,7 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
   if (src.value_type == s21_neg_infinity)
     *dst = -1.0 / 0.0;
   if (src.value_type == s21_nan)
-    *dst = 0.0 / 0.0;
+    *dst = a / b;
   return result;
 }
 
@@ -840,24 +836,24 @@ s21_decimal div_only_bits(s21_decimal number_1, s21_decimal number_2,
 
 int s21_truncate(s21_decimal value, s21_decimal *result) {
   s21_decimal ten = {{10, 0, 0, 0}, s21_usual}, res = ten, tmp = ten;
-  int sign = s21_getsign(&value);
-  int scale = get_scale(&value);
-  int valid = (value.value_type == s21_usual ? 1 : 0);
+  int ret = 0, sign = s21_getsign(&value), scale = get_scale(&value);
+  printf("%d %d\n", (char)(value.bits[3] >> 16), scale;
 
-  if (!scale && valid) {
+  if (!scale && !value.value_type) {
     res = value;
-  } else if (valid) {
+  } else if (!value.value_type) {
     for (int i = scale; i > 0; i--) {
       res = div_only_bits(value, ten, &tmp);
       value = res;
     }
-  } else {
+  } else {   // inf or nan
     res = value;
+    ret = 1;
   }
 
-  if (sign && valid) s21_setsign(&res, 1);
+  if (sign && !value.value_type) s21_setsign(&res, 1);
   *result = res;
-  return 0;
+  return ret;
 }
 
 /**
@@ -921,7 +917,6 @@ s21_decimal s21_floor(s21_decimal dec1) {
   return dec1;
 }
 
-// TODO(alex): return??.
 int s21_negate(s21_decimal value, s21_decimal *result) {
   int ret = 0;
   *result = value;
@@ -933,7 +928,7 @@ int s21_negate(s21_decimal value, s21_decimal *result) {
       if (result->value_type == s21_neg_infinity)
         result->value_type = s21_infinity;
     }
-  } else {
+  } else {  // inf or nan
     ret = 1;
   }
   return ret;
