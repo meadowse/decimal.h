@@ -835,14 +835,11 @@ s21_decimal div_only_bits(s21_decimal number_1, s21_decimal number_2,
 // }
 
 int s21_truncate(s21_decimal value, s21_decimal *result) {
-  s21_decimal ten = {{10, 0, 0, 0}, s21_usual}, res = ten, tmp = ten;
+  s21_decimal ten = {{10, 0, 0, 0}, s21_usual}, res = value, tmp = ten;
   int ret = 0, sign = s21_getsign(&value), scale = get_scale(&value);
-  printf("%d %d\n", (char)(value.bits[3] >> 16), scale;
 
-  if (!scale && !value.value_type) {
-    res = value;
-  } else if (!value.value_type) {
-    for (int i = scale; i > 0; i--) {
+  if (!value.value_type) {
+    for (int i = scale; i > 0; i--) {  // divide by 10 in the loop within the scale
       res = div_only_bits(value, ten, &tmp);
       value = res;
     }
