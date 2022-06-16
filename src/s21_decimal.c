@@ -1,42 +1,20 @@
 #include "s21_decimal.h"
 
-/**
- * @brief Временная функция для инициализаци структуры которая хранит число
- * * Децимал
- * @param varPtr указатель на число децимал
- */
-void init_struct(s21_decimal *varPtr) {
-  clear_bits(varPtr);
-  varPtr->value_type = s21_usual;
+void set0bitstype(s21_decimal *ptr) {
+  set0bits(ptr);
+  ptr->value_type = s21_usual;
 }
 
-/**
- * @brief Возвращает значение указанного бита
- * @param decVar число децимал
- * @param bit номер бита
- * @return значение указанного бита (0 - если бит равен нулю, 1 - bit on)
- */
-int get_bit(const s21_decimal decVar, int bit) {
-  int res = 0;
-  if (bit / 32 < 4) {
-    unsigned int mask = 1u << (bit % 32);
-    res = decVar.bits[bit / 32] & mask;
-  }
-  return !!res;
+int get_bit(const s21_decimal value, int bit) {
+  return value.bits[bit / 32] & (1u << (bit % 32));
 }
 
-/**
- * @brief Установить указанный бит вкл/выкл
- * @param varPtr указатель на число децимал
- * @param bit номер бита
- * @param value значение бита
- */
-void set_bit(s21_decimal *varPtr, int bit, int value) {
+void set_bit(s21_decimal *ptr, int bit, int value) {
   unsigned int mask = 1u << (bit % 32);
-  if (bit / 32 < 4 && value) {
-    varPtr->bits[bit / 32] |= mask;
-  } else if (bit / 32 < 4 && !value) {
-    varPtr->bits[bit / 32] &= ~mask;
+  if (value) {
+    ptr->bits[bit / 32] |= mask;
+  } else {
+    ptr->bits[bit / 32] &= ~mask;
   }
 }
 
@@ -94,16 +72,11 @@ void offset_left(s21_decimal *varPtr, int value_offset) {
   }
 }
 
-/**
- * @brief
- * @param number
- * @return 0-95 - номер значащего бита, -1 - если все биты пустые
- */
-int last_bit(s21_decimal number) {
-  int last_bit = 95;
-  for (; last_bit >= 0 && get_bit(number, last_bit) == 0; last_bit--) {
+int last_bit(s21_decimal value) {
+  int lb = 95;
+  for (; lb >= 0 && get_bit(value, lb) == 0; lb--) {
   }
-  return last_bit;
+  return lb;  // 0-95 - номер значащего бита, -1 - если все биты пустые
 }
 
 /**
@@ -148,7 +121,7 @@ int scale_equalize(s21_decimal *number_1, s21_decimal *number_2) {
   }
 
   s21_decimal tmp;
-  init_struct(&tmp);
+  set0bitstype(&tmp);
 
   int scaleSmall;
   int scaleBig;
@@ -348,7 +321,7 @@ s21_decimal s21_add(s21_decimal number_1, s21_decimal number_2) {
       s21_setsign(&res, 1);
       if (res.value_type == s21_infinity) {
         res.value_type = s21_neg_infinity;
-        clear_bits(&res);
+        set0bits(&res);
       }
     }
   }
@@ -787,52 +760,26 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
  * @param buf остаток от деления
  * @return s21_decimal результат деление (целая часть)
  */
-s21_decimal div_only_bits(s21_decimal number_1, s21_decimal number_2,
-                          s21_decimal *buf) {
-  init_struct(buf);
+s21_decimal div_only_bits(s21_decimal a, s21_decimal b,
+                          s21_decimal *rem) {
+  set0bitstype(rem);
   s21_decimal res = {{0, 0, 0, 0}, 0};
-  for (int i = last_bit(number_1); i >= 0; i--) {
-    if (get_bit(number_1, i)) set_bit(buf, 0, 1);
-    if (s21_is_greater_or_equal(*buf, number_2) == TRUE) {
-      *buf = s21_sub(*buf, number_2);
-      if (i != 0) offset_left(buf, 1);
-      if (get_bit(number_1, i - 1)) set_bit(buf, 0, 1);
+  for (int i = last_bit(a); i >= 0; i--) {
+    if (get_bit(a, i)) set_bit(rem, 0, 1);
+    if (s21_is_greater_or_equal(*rem, b) == TRUE) {
+      *rem = s21_sub(*rem, b);
+      if (i != 0) offset_left(rem, 1);
+      if (get_bit(a, i - 1)) set_bit(rem, 0, 1);
       offset_left(&res, 1);
       set_bit(&res, 0, 1);
     } else {
       offset_left(&res, 1);
-      if (i != 0) offset_left(buf, 1);
-      if ((i - 1) >= 0 && get_bit(number_1, i - 1)) set_bit(buf, 0, 1);
+      if (i != 0) offset_left(rem, 1);
+      if ((i - 1) >= 0 && get_bit(a, i - 1)) set_bit(rem, 0, 1);
     }
   }
   return res;
 }
-
-// int s21_decimal s21_truncate(s21_decimal number_1) {
-//   s21_decimal ten = {{10, 0, 0, 0}, s21_usual};
-//   s21_decimal res = {{0, 0, 0, 0}, 0};
-//   s21_decimal tmp = {{0, 0, 0, 0}, s21_usual};
-
-//   int sign_number_1 = s21_getsign(&number_1);
-//   int scale = get_scale(&number_1);
-
-//   int valid_value = (number_1.value_type == s21_usual ? 1 : 0);
-
-//   if (!scale && valid_value) {
-//     res = number_1;
-//   } else if (valid_value) {
-//     for (int i = scale; i > 0; i--) {
-//       res = div_only_bits(number_1, ten, &tmp);
-//       number_1 = res;
-//     }
-//   } else {
-//     res = number_1;
-//   }
-
-//   if (sign_number_1 && valid_value) s21_setsign(&res, 1);
-
-//   return res;
-// }
 
 int s21_truncate(s21_decimal value, s21_decimal *result) {
   s21_decimal ten = {{10, 0, 0, 0}, s21_usual}, res = value, tmp = ten;
@@ -901,7 +848,7 @@ s21_decimal s21_floor(s21_decimal dec1) {
   s21_decimal one = {{1, 0, 0, 0}, s21_usual};
   s21_decimal ten = {{10, 0, 0, 0}, s21_usual};
   s21_decimal buf;
-  init_struct(&buf);
+  set0bitstype(&buf);
   for (int i = scale_dec1; i > 0; i--) dec1 = div_only_bits(dec1, ten, &buf);
   set_scale(&dec1, 0);
 
@@ -931,12 +878,6 @@ int s21_negate(s21_decimal value, s21_decimal *result) {
   return ret;
 }
 
-/**
- * @brief зануляет все биты передаваемой переменной,
- * не трогает скейл и тип
- *
- * @param varPtr указатель на очищаемую переменную
- */
-void clear_bits(s21_decimal *varPtr) {
-  memset(varPtr->bits, 0, sizeof(varPtr->bits));
+void set0bits(s21_decimal *ptr) {
+  memset(ptr->bits, 0, sizeof(ptr->bits));
 }
