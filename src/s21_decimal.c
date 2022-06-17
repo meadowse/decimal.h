@@ -151,7 +151,7 @@ int scale_equalize(s21_decimal *number_1, s21_decimal *number_2) {
 
       s21_decimal tmpDiv = div_only_bits(*bigger, ten, &remainder);
       s21_decimal zero = {{0, 0, 0, 0}, s21_usual};
-      if (zero_check(tmpDiv, zero) == 1) {
+      if (s21_are_zero(tmpDiv, zero) == 1) {
         // tmpDiv не обрезался по самые гланды
         bits_copy(tmpDiv, bigger);
       } else {
@@ -285,9 +285,9 @@ s21_decimal s21_add(s21_decimal number_1, s21_decimal number_2) {
           // обезопасимся от обнуления
           s21_decimal zero = {{0, 0, 0, 0}, s21_usual};
 
-          zero_check(tmpDiv1, zero) == 1 ? bits_copy(tmpDiv1, &number_1)
+          s21_are_zero(tmpDiv1, zero) == 1 ? bits_copy(tmpDiv1, &number_1)
                                          : bits_copy(remainder1, &number_1);
-          zero_check(tmpDiv2, zero) == 1 ? bits_copy(tmpDiv2, &number_2)
+          s21_are_zero(tmpDiv2, zero) == 1 ? bits_copy(tmpDiv2, &number_2)
                                          : bits_copy(remainder2, &number_2);
 
           set_scale(&number_1, get_scale(&number_1) - 1);
@@ -397,18 +397,12 @@ s21_decimal s21_sub(s21_decimal number_1, s21_decimal number_2) {
   return res;
 }
 
-/**
- * @brief Является ли одно из чисел NAN
- * @param dec1 Первое число децимал
- * @param dec2 Второе число децимал
- * @return FALSE - числа не NAN, TRUE - одно из децималов NAN
- */
-int is_NAN(s21_decimal *dec1, s21_decimal *dec2) {
-  int vt_dec1 = dec1->value_type;
-  int vt_dec2 = dec2->value_type;
+// int s21_is_nan(s21_decimal *dec1, s21_decimal *dec2) {
+//   // int vt_dec1 = dec1->value_type;
+//   // int vt_dec2 = dec2->value_type;
 
-  return (vt_dec1 == s21_nan || vt_dec2 == s21_nan) ? TRUE : FALSE;
-}
+//   return (dec1->value_type == s21_nan || dec2->value_type == s21_nan) ? TRUE : FALSE;
+// }
 
 /**
  * @brief Проверка на полож бесконечность
@@ -432,29 +426,15 @@ int is_inf(s21_decimal *dec1, s21_decimal *dec2) {
   return who_is_inf;
 }
 
-/**
- * @brief Проверка на отриц бесконечность
- * @param dec1 Первое число децимал
- * @param dec2 Второе число децимал
- * @return 0 - не бесконечны, 1 - первое бесконечно, 2 - оба бесконечны, -1 -
- * второе бесконечно
- */
-int is_neg_inf(s21_decimal *dec1, s21_decimal *dec2) {
-  int who_is_inf = 0;
-  int vt_dec1 = dec1->value_type;
-  int vt_dec2 = dec2->value_type;
-
-  if (vt_dec1 == s21_neg_infinity && vt_dec2 != s21_neg_infinity) {
-    who_is_inf = 1;
-  }
-  if (vt_dec1 != s21_neg_infinity && vt_dec2 == s21_neg_infinity) {
-    who_is_inf = -1;
-  }
-  if (vt_dec1 == s21_neg_infinity && vt_dec2 == s21_neg_infinity) {
-    who_is_inf = 2;
-  }
-
-  return who_is_inf;
+int s21_are_neg_inf(s21_decimal *a, s21_decimal *b) {
+  int res = 0;
+  if (a->value_type == s21_neg_infinity && b->value_type != s21_neg_infinity)
+    res = 1;
+  if (a->value_type != s21_neg_infinity && b->value_type == s21_neg_infinity)
+    res = -1;
+  if (a->value_type == s21_neg_infinity && b->value_type == s21_neg_infinity)
+    res = 2;
+  return res;  // 0 - не бесконечны, 1 - первое бесконечно, 2 - оба бесконечны, -1 - второе бесконечно
 }
 
 /**
@@ -489,24 +469,9 @@ void check_scale(s21_decimal *dec1, s21_decimal *dec2) {
   }
 }
 
-/**
- * @brief Являются ли числа нулями
- * @param dec1 Первое число децимал
- * @param dec2 Второе число децимал
- * @return 0 - являются (только когда оба),
- * 1 - не являются (по крайней мере одно)
- */
-int zero_check(s21_decimal dec1, s21_decimal dec2) {
-  int is_zero = FALSE;
-  s21_decimal *pt1 = &dec1;
-  s21_decimal *pt2 = &dec2;
-
-  if (pt1 && pt2) {
-    if (!dec1.bits[0] && !dec2.bits[0] && !dec1.bits[1] && !dec2.bits[1] &&
-        !dec1.bits[2] && !dec2.bits[2])
-      is_zero = TRUE;
-  }
-  return is_zero;
+int s21_are_zero(s21_decimal a, s21_decimal b) {
+  return (!a.bits[0] && !b.bits[0] && !a.bits[1] && !b.bits[1] &&
+        !a.bits[2] && !b.bits[2] && !a.bits[3] && !b.bits[3]) ? 0 : 1;
 }
 
 /**
@@ -517,9 +482,9 @@ int zero_check(s21_decimal dec1, s21_decimal dec2) {
  */
 int s21_is_greater(s21_decimal dec1, s21_decimal dec2) {
   int is_greater = -1;
-  if (is_NAN(&dec1, &dec2) == TRUE) is_greater = FALSE;
-  if (!zero_check(dec1, dec2) && !is_inf(&dec1, &dec2) &&
-      !is_neg_inf(&dec1, &dec2))
+  if ((dec1.value_type == s21_nan || dec2.value_type == s21_nan)) is_greater = 1;
+  if (!s21_are_zero(dec1, dec2) && !is_inf(&dec1, &dec2) &&
+      !s21_are_neg_inf(&dec1, &dec2))
     is_greater = FALSE;
 
   if (is_greater == -1) {
@@ -527,9 +492,9 @@ int s21_is_greater(s21_decimal dec1, s21_decimal dec2) {
     if (who_is_inf == 1) is_greater = TRUE;
     if (who_is_inf == -1 || who_is_inf == 2) is_greater = FALSE;
 
-    int who_is_neg_inf = is_neg_inf(&dec1, &dec2);
-    if (who_is_neg_inf == -1) is_greater = TRUE;
-    if (who_is_neg_inf == 1 || who_is_inf == 2) is_greater = FALSE;
+    int who_s21_are_neg_inf = s21_are_neg_inf(&dec1, &dec2);
+    if (who_s21_are_neg_inf == -1) is_greater = TRUE;
+    if (who_s21_are_neg_inf == 1 || who_is_inf == 2) is_greater = FALSE;
   }
 
   if (is_greater == -1) {
@@ -572,18 +537,18 @@ int s21_is_less(s21_decimal dec1, s21_decimal dec2) {
 //  */
 int s21_is_equal(s21_decimal dec1, s21_decimal dec2) {
   int is_equal = -1;
-  if (is_NAN(&dec1, &dec2) == TRUE) is_equal = FALSE;
+  if ((dec1.value_type == s21_nan || dec2.value_type == s21_nan)) is_equal = FALSE;
 
   if (is_equal == -1) {
-    if (zero_check(dec1, dec2) == TRUE) is_equal = TRUE;
+    if (s21_are_zero(dec1, dec2) == TRUE) is_equal = TRUE;
 
     int who_is_inf = is_inf(&dec1, &dec2);
     if (who_is_inf == 1 || who_is_inf == -1) is_equal = FALSE;
     if (who_is_inf == 2) is_equal = TRUE;
 
-    int who_is_neg_inf = is_neg_inf(&dec1, &dec2);
-    if (who_is_neg_inf == 1 || who_is_neg_inf == -1) is_equal = FALSE;
-    if (who_is_neg_inf == 2) is_equal = TRUE;
+    int who_s21_are_neg_inf = s21_are_neg_inf(&dec1, &dec2);
+    if (who_s21_are_neg_inf == 1 || who_s21_are_neg_inf == -1) is_equal = FALSE;
+    if (who_s21_are_neg_inf == 2) is_equal = TRUE;
   }
 
   if (is_equal == -1) {
@@ -766,7 +731,7 @@ s21_decimal div_only_bits(s21_decimal a, s21_decimal b,
   s21_decimal res = {{0, 0, 0, 0}, 0};
   for (int i = last_bit(a); i >= 0; i--) {
     if (get_bit(a, i)) set_bit(rem, 0, 1);
-    if (s21_is_greater_or_equal(*rem, b) == TRUE) {
+    if (!s21_is_greater_or_equal(*rem, b)) {
       *rem = s21_sub(*rem, b);
       if (i != 0) offset_left(rem, 1);
       if (get_bit(a, i - 1)) set_bit(rem, 0, 1);

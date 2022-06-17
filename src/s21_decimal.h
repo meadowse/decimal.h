@@ -70,10 +70,10 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst);
 int getFloatExp(float *src);
 int getFloatSign(float *src);
 int s21_is_even(s21_decimal dec1);
-int is_NAN(s21_decimal *dec1, s21_decimal *dec2);
-int zero_check(s21_decimal dec1, s21_decimal dec2);
+// int is_NAN(s21_decimal *dec1, s21_decimal *dec2);
+int s21_are_zero(s21_decimal, s21_decimal);
 int is_inf(s21_decimal *dec1, s21_decimal *dec2);
-int is_neg_inf(s21_decimal *dec1, s21_decimal *dec2);
+int s21_are_neg_inf(s21_decimal *, s21_decimal *);
 int is_negative(s21_decimal *dec1, s21_decimal *dec2);
 void check_scale(s21_decimal *dec1, s21_decimal *dec2);
 
