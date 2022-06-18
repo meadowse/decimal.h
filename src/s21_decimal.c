@@ -209,7 +209,7 @@ s21_decimal bit_addition(s21_decimal *var1, s21_decimal *var2) {
     else
       res.value_type = s21_usual;
   }
-  if (is_inf(var1, var2) != 0) {
+  if (s21_are_inf(var1, var2) != 0) {
     res.value_type = s21_infinity;
   }
 
@@ -397,33 +397,17 @@ s21_decimal s21_sub(s21_decimal number_1, s21_decimal number_2) {
   return res;
 }
 
-// int s21_is_nan(s21_decimal *dec1, s21_decimal *dec2) {
-//   // int vt_dec1 = dec1->value_type;
-//   // int vt_dec2 = dec2->value_type;
+int s21_are_inf(s21_decimal *value1, s21_decimal *value2) {
+  int res = 0; 
 
-//   return (dec1->value_type == s21_nan || dec2->value_type == s21_nan) ? TRUE : FALSE;
-// }
-
-/**
- * @brief Проверка на полож бесконечность
- * @param dec1 Первое число децимал
- * @param dec2 Второе число децимал
- * @return 0 - не бесконечны, 1 - первое бесконечно, 2 - оба бесконечны, -1 -
- * второе бесконечно
- */
-int is_inf(s21_decimal *dec1, s21_decimal *dec2) {
-  int who_is_inf = 0;
-  int vt_dec1 = dec1->value_type;
-  int vt_dec2 = dec2->value_type;
-
-  if (vt_dec1 == s21_infinity && vt_dec2 != s21_infinity) {
-    who_is_inf = 1;
-  } else if (vt_dec1 != s21_infinity && vt_dec2 == s21_infinity) {
-    who_is_inf = -1;
-  } else if (vt_dec1 == s21_infinity && vt_dec2 == s21_infinity) {
-    who_is_inf = 2;
+  if (value1->value_type == s21_infinity && value2->value_type != s21_infinity) {
+    res = 1;
+  } else if (value1->value_type != s21_infinity && value2->value_type == s21_infinity) {
+    res = -1;
+  } else if (value1->value_type == s21_infinity && value2->value_type == s21_infinity) {
+    res = 2;
   }
-  return who_is_inf;
+  return res;  // 0 - не бесконечны, 1 - первое бесконечно, 2 - оба бесконечны, -1 - второе бесконечно
 }
 
 int s21_are_neg_inf(s21_decimal *a, s21_decimal *b) {
@@ -437,22 +421,15 @@ int s21_are_neg_inf(s21_decimal *a, s21_decimal *b) {
   return res;  // 0 - не бесконечны, 1 - первое бесконечно, 2 - оба бесконечны, -1 - второе бесконечно
 }
 
-/**
- * @brief Проверка чисел на отрицательное значение
- * @param dec1 Первое число децимал
- * @param dec2 Второе число децимал
- * @return 0 - оба одного знака, 1 - первое положительное, -1 - второе
- * положительное
- */
-int is_negative(s21_decimal *dec1, s21_decimal *dec2) {
-  int who_is_negative = 0;
-  int sign_dec1 = s21_getsign(dec1);
-  int sign_dec2 = s21_getsign(dec2);
+int s21_are_neg(s21_decimal *value1, s21_decimal *value2) {
+  int res = 0;
+  int sign1 = s21_getsign(value1);
+  int sign2 = s21_getsign(value2);
 
-  if (!sign_dec1 && sign_dec2) who_is_negative = 1;
-  if (sign_dec1 && !sign_dec2) who_is_negative = -1;
+  if (!sign1 && sign2) res = 1;
+  if (sign1 && !sign2) res = -1;
 
-  return who_is_negative;
+  return res;  // 0 - оба одного знака, 1 - первое положительное, -1 - второе положительное
 }
 
 /**
@@ -471,7 +448,7 @@ void check_scale(s21_decimal *dec1, s21_decimal *dec2) {
 
 int s21_are_zero(s21_decimal a, s21_decimal b) {
   return (!a.bits[0] && !b.bits[0] && !a.bits[1] && !b.bits[1] &&
-        !a.bits[2] && !b.bits[2] && !a.bits[3] && !b.bits[3]) ? 0 : 1;
+        !a.bits[2] && !b.bits[2]) ? 0 : 1;
 }
 
 /**
@@ -483,22 +460,22 @@ int s21_are_zero(s21_decimal a, s21_decimal b) {
 int s21_is_greater(s21_decimal dec1, s21_decimal dec2) {
   int is_greater = -1;
   if ((dec1.value_type == s21_nan || dec2.value_type == s21_nan)) is_greater = 1;
-  if (!s21_are_zero(dec1, dec2) && !is_inf(&dec1, &dec2) &&
+  if (!s21_are_zero(dec1, dec2) && !s21_are_inf(&dec1, &dec2) &&
       !s21_are_neg_inf(&dec1, &dec2))
     is_greater = FALSE;
 
   if (is_greater == -1) {
-    int who_is_inf = is_inf(&dec1, &dec2);
-    if (who_is_inf == 1) is_greater = TRUE;
-    if (who_is_inf == -1 || who_is_inf == 2) is_greater = FALSE;
+    int who_are_inf = s21_are_inf(&dec1, &dec2);
+    if (who_are_inf == 1) is_greater = TRUE;
+    if (who_are_inf == -1 || who_are_inf == 2) is_greater = FALSE;
 
     int who_s21_are_neg_inf = s21_are_neg_inf(&dec1, &dec2);
     if (who_s21_are_neg_inf == -1) is_greater = TRUE;
-    if (who_s21_are_neg_inf == 1 || who_is_inf == 2) is_greater = FALSE;
+    if (who_s21_are_neg_inf == 1 || who_are_inf == 2) is_greater = FALSE;
   }
 
   if (is_greater == -1) {
-    int who_is_negative = is_negative(&dec1, &dec2);
+    int who_is_negative = s21_are_neg(&dec1, &dec2);
     if (who_is_negative == 1) is_greater = TRUE;
     if (who_is_negative == -1) is_greater = FALSE;
 
@@ -537,23 +514,22 @@ int s21_is_less(s21_decimal dec1, s21_decimal dec2) {
 //  */
 int s21_is_equal(s21_decimal dec1, s21_decimal dec2) {
   int is_equal = -1;
-  if ((dec1.value_type == s21_nan || dec2.value_type == s21_nan)) is_equal = FALSE;
+  if ((dec1.value_type == s21_nan || dec2.value_type == s21_nan)) is_equal = 1;
 
   if (is_equal == -1) {
-    if (s21_are_zero(dec1, dec2) == TRUE) is_equal = TRUE;
+    if (!s21_are_zero(dec1, dec2)) is_equal = 0;
 
-    int who_is_inf = is_inf(&dec1, &dec2);
-    if (who_is_inf == 1 || who_is_inf == -1) is_equal = FALSE;
-    if (who_is_inf == 2) is_equal = TRUE;
+    int dec_inf = s21_are_inf(&dec1, &dec2);
+    if (dec_inf == 1 || dec_inf == -1) is_equal = 1;
+    if (dec_inf == 2) is_equal = 0;
 
-    int who_s21_are_neg_inf = s21_are_neg_inf(&dec1, &dec2);
-    if (who_s21_are_neg_inf == 1 || who_s21_are_neg_inf == -1) is_equal = FALSE;
-    if (who_s21_are_neg_inf == 2) is_equal = TRUE;
+    int dec_neg_inf = s21_are_neg_inf(&dec1, &dec2);
+    if (dec_neg_inf == 1 || dec_neg_inf == -1) is_equal = 1;
+    if (dec_neg_inf == 2) is_equal = 0;
   }
 
   if (is_equal == -1) {
-    int who_is_negative = is_negative(&dec1, &dec2);
-    if (who_is_negative != 0) is_equal = FALSE;
+    if (s21_are_neg(&dec1, &dec2)) is_equal = 1;
 
     check_scale(&dec1, &dec2);
   }
