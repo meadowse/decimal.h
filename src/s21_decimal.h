@@ -51,12 +51,12 @@ void s21_copy_bits(s21_decimal, s21_decimal *);
 void convert_to_addcode(s21_decimal *number_1);
 void s21_set_scale(s21_decimal *, int);
 void s21_shift_left(s21_decimal *, int);
-void set0bitstype(s21_decimal *);
+void s21_set0bitstype(s21_decimal *);
 void s21_set_bit(s21_decimal *, int, int);
 void s21_setsign(s21_decimal *varPtr, int sign);
 void s21_set0bits(s21_decimal *);
 s21_decimal s21_add_bits(s21_decimal *less, s21_decimal *more);
-s21_decimal div_only_bits(s21_decimal a, s21_decimal b, s21_decimal *buf);
+s21_decimal s21_div_bits(s21_decimal, s21_decimal, s21_decimal *);
 s21_decimal check_boundary(s21_decimal, s21_decimal);
 
 #define SUCESS 0
