@@ -38,26 +38,26 @@ int s21_truncate(s21_decimal, s21_decimal*);
 int s21_negate(s21_decimal, s21_decimal*);
 
 int s21_is_less(s21_decimal, s21_decimal);
-int s21_is_greater(s21_decimal, s21_decimal);
-int s21_is_greater_or_equal(s21_decimal, s21_decimal);
-int s21_is_equal(s21_decimal, s21_decimal);
+int s21_1st_greater(s21_decimal, s21_decimal);
+int s21_gte(s21_decimal, s21_decimal);
+int s21_are_equal(s21_decimal, s21_decimal);
 
-int get_bit(const s21_decimal, int);
+int s21_get_bit(const s21_decimal, int);
 int s21_getsign(const s21_decimal*);
-int get_scale(const s21_decimal *varPtr);
-int scale_equalize(s21_decimal *number_1, s21_decimal *number_2);
-int last_bit(s21_decimal);
-void bits_copy(s21_decimal src, s21_decimal *dest);
+int s21_get_scale(const s21_decimal *);
+void s21_level_scale(s21_decimal *, s21_decimal *);
+int s21_last_bit(s21_decimal);
+void s21_copy_bits(s21_decimal, s21_decimal *);
 void convert_to_addcode(s21_decimal *number_1);
-void set_scale(s21_decimal *varPtr, int scale);
-void offset_left(s21_decimal *varPtr, int value_offset);
+void s21_set_scale(s21_decimal *, int);
+void s21_shift_left(s21_decimal *, int);
 void set0bitstype(s21_decimal *);
-void set_bit(s21_decimal *varPtr, int bit, int value);
+void s21_set_bit(s21_decimal *, int, int);
 void s21_setsign(s21_decimal *varPtr, int sign);
-void set0bits(s21_decimal *);
-s21_decimal bit_addition(s21_decimal *less, s21_decimal *more);
+void s21_set0bits(s21_decimal *);
+s21_decimal s21_add_bits(s21_decimal *less, s21_decimal *more);
 s21_decimal div_only_bits(s21_decimal a, s21_decimal b, s21_decimal *buf);
-s21_decimal check_for_add(s21_decimal number_1, s21_decimal number_2);
+s21_decimal check_boundary(s21_decimal, s21_decimal);
 
 #define SUCESS 0
 #define CONVERTING_ERROR 1
@@ -75,6 +75,6 @@ int s21_are_zero(s21_decimal, s21_decimal);
 int s21_are_inf(s21_decimal *, s21_decimal *);
 int s21_are_neg_inf(s21_decimal *, s21_decimal *);
 int s21_are_neg(s21_decimal *, s21_decimal *);
-void check_scale(s21_decimal *dec1, s21_decimal *dec2);
+void s21_check_scale(s21_decimal *dec1, s21_decimal *dec2);
 
 #endif  // SRC_S21_DECIMAL_H_
