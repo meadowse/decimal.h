@@ -556,7 +556,6 @@ int s21_truncate(s21_decimal value, s21_decimal *res) {
     ret = 1;
   }
 
-  // *resu = res;
   return ret;
 }
 
@@ -565,8 +564,9 @@ int s21_truncate(s21_decimal value, s21_decimal *res) {
  * @param dec1 Число к округлению
  * @return Округленный децимал
  */
-s21_decimal s21_round(s21_decimal dec1) {
-  int valid_value = (dec1.value_type == s21_usual ? 1 : 0);
+int s21_round(s21_decimal value, s21_decimal *res) {
+// s21_decimal s21_round(s21_decimal dec1) {
+  int ret = 0, valid_value = (dec1.value_type == s21_usual ? 1 : 0);
 
   s21_decimal res = {{0, 0, 0, 0}, s21_usual};
   s21_decimal one = {{1, 0, 0, 0}, s21_usual};
@@ -591,7 +591,7 @@ s21_decimal s21_round(s21_decimal dec1) {
     res.value_type = dec1.value_type;
   }
 
-  return res;
+  return ret;
 }
 
 /**

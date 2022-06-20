@@ -199,145 +199,175 @@ START_TEST(truncate14) {
 }
 END_TEST
 
-START_TEST(s21_round_1) {
-    s21_decimal src1;
-    src1.value_type = s21_usual;
-    src1.bits[0] = 0b01100011000011111111111111111111;
-    src1.bits[1] = 0b01101011110001110101111000101101;
-    src1.bits[2] = 0b00000000000000000000000000000101;
-    src1.bits[3] = 0b10000000000010100000000000000000;
-    s21_decimal result;
-    result.bits[0] = 0b01010100000010111110010000000000;
-    result.bits[1] = 0b00000000000000000000000000000010;
-    result.bits[2] = 0b00000000000000000000000000000000;
-    result.bits[3] = 0b10000000000000000000000000000000;
-    s21_decimal res_od = s21_round(src1);
-    ck_assert_float_eq(res_od.bits[0], result.bits[0]);
-    ck_assert_float_eq(res_od.bits[1], result.bits[1]);
-    ck_assert_float_eq(res_od.bits[2], result.bits[2]);
-    ck_assert_float_eq(res_od.bits[3], result.bits[3]);
+START_TEST(round1) {
+    s21_decimal src, res, res2;
+    src.value_type = 0;
+    src.bits[0] = 0b01100011000011111111111111111111;
+    src.bits[1] = 0b01101011110001110101111000101101;
+    src.bits[2] = 0b00000000000000000000000000000101;
+    src.bits[3] = 0b10000000000010100000000000000000;
+    res.bits[0] = 0b01010100000010111110010000000000;
+    res.bits[1] = 0b00000000000000000000000000000010;
+    res.bits[2] = 0b00000000000000000000000000000000;
+    res.bits[3] = 0b10000000000000000000000000000000;
+    s21_round(src, &res2);
+    ck_assert_float_eq(res2.bits[0], res.bits[0]);
+    ck_assert_float_eq(res2.bits[1], res.bits[1]);
+    ck_assert_float_eq(res2.bits[2], res.bits[2]);
+    ck_assert_float_eq(res2.bits[3], res.bits[3]);
 }
 END_TEST
-START_TEST(s21_round_2) {
-    s21_decimal src1;
-    src1.value_type = s21_usual;
-    src1.bits[0] = 0b01010101001110101110101110110001;
-    src1.bits[1] = 0b00001101101101001101101001011111;
-    src1.bits[2] = 0b00000000000000000000000000000000;
-    src1.bits[3] = 0b10000000000100100000000000000000;
-    s21_decimal result;
-    result.bits[0] = 0b00000000000000000000000000000001;
-    result.bits[1] = 0b00000000000000000000000000000000;
-    result.bits[2] = 0b00000000000000000000000000000000;
-    result.bits[3] = 0b10000000000000000000000000000000;
-    s21_decimal res_od = s21_round(src1);
-    ck_assert_float_eq(res_od.bits[0], result.bits[0]);
-    ck_assert_float_eq(res_od.bits[1], result.bits[1]);
-    ck_assert_float_eq(res_od.bits[2], result.bits[2]);
-    ck_assert_float_eq(res_od.bits[3], result.bits[3]);
+START_TEST(round2) {
+    s21_decimal src, res, res2;
+    src.value_type = 0;
+    src.bits[0] = 0b01010101001110101110101110110001;
+    src.bits[1] = 0b00001101101101001101101001011111;
+    src.bits[2] = 0b00000000000000000000000000000000;
+    src.bits[3] = 0b10000000000100100000000000000000;
+    res.bits[0] = 0b00000000000000000000000000000001;
+    res.bits[1] = 0b00000000000000000000000000000000;
+    res.bits[2] = 0b00000000000000000000000000000000;
+    res.bits[3] = 0b10000000000000000000000000000000;
+    s21_round(src, &res2);
+    ck_assert_float_eq(res2.bits[0], res.bits[0]);
+    ck_assert_float_eq(res2.bits[1], res.bits[1]);
+    ck_assert_float_eq(res2.bits[2], res.bits[2]);
+    ck_assert_float_eq(res2.bits[3], res.bits[3]);
 }
 END_TEST
-START_TEST(s21_round_3) {
-    s21_decimal src1;
-    src1.value_type = s21_usual;
-    src1.bits[0] = 0b10010011111100000001110001010010;
-    src1.bits[1] = 0b00000000000000000000000100100000;
-    src1.bits[2] = 0b00000000000000000000000000000000;
-    src1.bits[3] = 0b00000000000010100000000000000000;
-    s21_decimal result;
-    result.bits[0] = 0b00000000000000000000000001111100;
-    result.bits[1] = 0b00000000000000000000000000000000;
-    result.bits[2] = 0b00000000000000000000000000000000;
-    result.bits[3] = 0b00000000000000000000000000000000;
-    s21_decimal res_od = s21_round(src1);
-    ck_assert_float_eq(res_od.bits[0], result.bits[0]);
-    ck_assert_float_eq(res_od.bits[1], result.bits[1]);
-    ck_assert_float_eq(res_od.bits[2], result.bits[2]);
-    ck_assert_float_eq(res_od.bits[3], result.bits[3]);
+START_TEST(round3) {
+    s21_decimal src, res, res2;
+    src.value_type = 0;
+    src.bits[0] = 0b10010011111100000001110001010010;
+    src.bits[1] = 0b00000000000000000000000100100000;
+    src.bits[2] = 0b00000000000000000000000000000000;
+    src.bits[3] = 0b00000000000010100000000000000000;
+    res.bits[0] = 0b00000000000000000000000001111100;
+    res.bits[1] = 0b00000000000000000000000000000000;
+    res.bits[2] = 0b00000000000000000000000000000000;
+    res.bits[3] = 0b00000000000000000000000000000000;
+    s21_round(src, &res2);
+    ck_assert_float_eq(res2.bits[0], res.bits[0]);
+    ck_assert_float_eq(res2.bits[1], res.bits[1]);
+    ck_assert_float_eq(res2.bits[2], res.bits[2]);
+    ck_assert_float_eq(res2.bits[3], res.bits[3]);
 }
 END_TEST
-START_TEST(s21_round_4) {
-    s21_decimal src1;
-    src1.value_type = s21_usual;
-    src1.bits[0] = 0b11001101110001110111110001000000;
-    src1.bits[1] = 0b00111110001001010000001001100000;
-    src1.bits[2] = 0b00100000010011111100111001011110;
-    src1.bits[3] = 0b10000000000001000000000000000000;
-    s21_decimal result;
-    result.bits[0] = 0b10100000111111100100111000000100;
-    result.bits[1] = 0b00011011110011101100110011101101;
-    result.bits[2] = 0b00000000000000001101001111000010;
-    result.bits[3] = 0b10000000000000000000000000000000;
-    s21_decimal res_od = s21_round(src1);
-    ck_assert_float_eq(res_od.bits[0], result.bits[0]);
-    ck_assert_float_eq(res_od.bits[1], result.bits[1]);
-    ck_assert_float_eq(res_od.bits[2], result.bits[2]);
-    ck_assert_float_eq(res_od.bits[3], result.bits[3]);
+START_TEST(round4) {
+    s21_decimal src, res, res2;
+    src.value_type = 0;
+    src.bits[0] = 0b11001101110001110111110001000000;
+    src.bits[1] = 0b00111110001001010000001001100000;
+    src.bits[2] = 0b00100000010011111100111001011110;
+    src.bits[3] = 0b10000000000001000000000000000000;
+    res.bits[0] = 0b10100000111111100100111000000100;
+    res.bits[1] = 0b00011011110011101100110011101101;
+    res.bits[2] = 0b00000000000000001101001111000010;
+    res.bits[3] = 0b10000000000000000000000000000000;
+    s21_round(src, &res2);
+    ck_assert_float_eq(res2.bits[0], res.bits[0]);
+    ck_assert_float_eq(res2.bits[1], res.bits[1]);
+    ck_assert_float_eq(res2.bits[2], res.bits[2]);
+    ck_assert_float_eq(res2.bits[3], res.bits[3]);
 }
 END_TEST
-START_TEST(s21_round_5) {
-    s21_decimal src1;
-    src1.value_type = s21_usual;
-    src1.bits[0] = 0b10100000111111100100111000000100;
-    src1.bits[1] = 0b00011011110011101100110011101101;
-    src1.bits[2] = 0b00000000000000001101001111000010;
-    src1.bits[3] = 0b00000000000000000000000000000000;
-    s21_decimal res_od = s21_round(src1);
-    s21_decimal result;
-    result.bits[0] = 0b10100000111111100100111000000100;
-    result.bits[1] = 0b00011011110011101100110011101101;
-    result.bits[2] = 0b00000000000000001101001111000010;
-    result.bits[3] = 0b00000000000000000000000000000000;
-    ck_assert_float_eq(res_od.bits[0], result.bits[0]);
-    ck_assert_float_eq(res_od.bits[1], result.bits[1]);
-    ck_assert_float_eq(res_od.bits[2], result.bits[2]);
-    ck_assert_float_eq(res_od.bits[3], result.bits[3]);
+START_TEST(round5) {
+    s21_decimal src, res, res2;
+    src.value_type = 0;
+    src.bits[0] = 0b10100000111111100100111000000100;
+    src.bits[1] = 0b00011011110011101100110011101101;
+    src.bits[2] = 0b00000000000000001101001111000010;
+    src.bits[3] = 0b00000000000000000000000000000000;
+    res.bits[0] = 0b10100000111111100100111000000100;
+    res.bits[1] = 0b00011011110011101100110011101101;
+    res.bits[2] = 0b00000000000000001101001111000010;
+    res.bits[3] = 0b00000000000000000000000000000000;
+    s21_round(src, &res2);
+    ck_assert_float_eq(res2.bits[0], res.bits[0]);
+    ck_assert_float_eq(res2.bits[1], res.bits[1]);
+    ck_assert_float_eq(res2.bits[2], res.bits[2]);
+    ck_assert_float_eq(res2.bits[3], res.bits[3]);
 }
 END_TEST
-START_TEST(s21_round_6) {
-    s21_decimal src1;
-    src1.value_type = s21_usual;
-    src1.bits[0] = 0b10010111011100111001111111111111;
-    src1.bits[1] = 0b00111100000010000011000110001101;
-    src1.bits[2] = 0b00000000000000000000000000000001;
-    src1.bits[3] = 0b00000000000001110000000000000000;
-    s21_decimal res_od = s21_round(src1);
-    s21_decimal result;
-    result.bits[3] = 0;
-    result.bits[2] = 0;
-    result.bits[1] = 0b00000000000000000000001000010010;
-    result.bits[0] = 0b00110110101101101000110001000000;
-    ck_assert_float_eq(res_od.bits[0], result.bits[0]);
-    ck_assert_float_eq(res_od.bits[1], result.bits[1]);
-    ck_assert_float_eq(res_od.bits[2], result.bits[2]);
-    ck_assert_float_eq(res_od.bits[3], result.bits[3]);
+START_TEST(round6) {
+    s21_decimal src, res, res2;
+    src.value_type = 0;
+    src.bits[0] = 0b10010111011100111001111111111111;
+    src.bits[1] = 0b00111100000010000011000110001101;
+    src.bits[2] = 0b00000000000000000000000000000001;
+    src.bits[3] = 0b00000000000001110000000000000000;
+    res.bits[3] = 0;
+    res.bits[2] = 0;
+    res.bits[1] = 0b00000000000000000000001000010010;
+    res.bits[0] = 0b00110110101101101000110001000000;
+    s21_round(src, &res2);
+    ck_assert_float_eq(res2.bits[0], res.bits[0]);
+    ck_assert_float_eq(res2.bits[1], res.bits[1]);
+    ck_assert_float_eq(res2.bits[2], res.bits[2]);
+    ck_assert_float_eq(res2.bits[3], res.bits[3]);
 }
 END_TEST
-START_TEST(s21_round_7) {
-    s21_decimal src1;
-    src1.value_type = s21_usual;
-    src1.bits[0] = 0b10010111011100111001111111111111;
-    src1.bits[1] = 0b00111100000010000011000110001101;
-    src1.bits[2] = 0b00000000000000000000000000000001;
-    src1.bits[3] = 0b10000000000001110000000000000000;
-    s21_decimal res_od = s21_round(src1);
-    s21_decimal result;
-    result.bits[3] = 0b10000000000000000000000000000000;
-    result.bits[2] = 0;
-    result.bits[1] = 0b00000000000000000000001000010010;
-    result.bits[0] = 0b00110110101101101000110001000000;
-    ck_assert_float_eq(res_od.bits[0], result.bits[0]);
-    ck_assert_float_eq(res_od.bits[1], result.bits[1]);
-    ck_assert_float_eq(res_od.bits[2], result.bits[2]);
-    ck_assert_float_eq(res_od.bits[3], result.bits[3]);
+START_TEST(round7) {
+    s21_decimal src, res, res2;
+    src.value_type = 0;
+    src.bits[0] = 0b10010111011100111001111111111111;
+    src.bits[1] = 0b00111100000010000011000110001101;
+    src.bits[2] = 0b00000000000000000000000000000001;
+    src.bits[3] = 0b10000000000001110000000000000000;
+    res.bits[3] = 0b10000000000000000000000000000000;
+    res.bits[2] = 0;
+    res.bits[1] = 0b00000000000000000000001000010010;
+    res.bits[0] = 0b00110110101101101000110001000000;
+    s21_round(src, &res2);
+    ck_assert_float_eq(res2.bits[0], res.bits[0]);
+    ck_assert_float_eq(res2.bits[1], res.bits[1]);
+    ck_assert_float_eq(res2.bits[2], res.bits[2]);
+    ck_assert_float_eq(res2.bits[3], res.bits[3]);
 }
 END_TEST
-START_TEST(s21_round_8) {
-    s21_decimal src1;
+START_TEST(round8) {
+    s21_decimal src, res;
     float a = -1.0 / 0.0;
-    s21_from_float_to_decimal(a, &src1);
-    s21_decimal res_od = s21_round(src1);
-    ck_assert_float_eq(res_od.value_type, s21_neg_infinity);
+    int b;
+    s21_from_float_to_decimal(a, &src);
+    s21_round(src, &res);
+    ck_assert_float_eq(res.value_type, s21_neg_infinity);
+
+    s21_from_float_to_decimal(1.0 / 0.0, &src);
+    s21_round(src, &res);
+    ck_assert_float_eq(res.value_type, s21_infinity);
+
+    s21_from_float_to_decimal(0.0 / 0.0, &src);
+    s21_round(src, &res);
+    ck_assert_float_eq(res.value_type, s21_nan);
+
+    s21_from_float_to_decimal(8.6, &src);
+    s21_round(src, &res);
+    s21_from_decimal_to_int(res, &b);
+    ck_assert_int_eq(b, 9);
+
+    s21_from_float_to_decimal(8.4, &src);
+    s21_round(src, &res);
+    s21_from_decimal_to_int(res, &b);
+    ck_assert_int_eq(b, 8);
+
+    s21_from_float_to_decimal(-8.4, &src);
+    s21_round(src, &res);
+    s21_from_decimal_to_int(res, &b);
+    ck_assert_int_eq(b, -8);
+    
+    s21_from_float_to_decimal(0, &src);
+    s21_round(src, &res);
+    s21_from_decimal_to_int(res, &b);
+    ck_assert_int_eq(b, 0);
+
+    src.bits[0] = 0b11111111111111111111111111111111;
+    src.bits[1] = 0b11111111111111111111111111111111;
+    src.bits[2] = 0b11111111111111111111111111111111;
+    src.bits[3] = 0b10000000111111110000000000000000;
+    s21_round(src, &res);
+    // TODO(alex) : to add the boubary cases: -nf, inf
+    // ck_assert_float_eq(res.value_type, s21_neg_infinity);
 }
 END_TEST
 
@@ -575,14 +605,14 @@ int main(void) {
     tcase_add_test(tc1_1, truncate13);
     tcase_add_test(tc1_1, truncate14);
 
-    tcase_add_test(tc1_1, s21_round_1);
-    tcase_add_test(tc1_1, s21_round_2);
-    tcase_add_test(tc1_1, s21_round_3);
-    tcase_add_test(tc1_1, s21_round_4);
-    tcase_add_test(tc1_1, s21_round_5);
-    tcase_add_test(tc1_1, s21_round_6);
-    tcase_add_test(tc1_1, s21_round_7);
-    tcase_add_test(tc1_1, s21_round_8);
+    tcase_add_test(tc1_1, round1);
+    tcase_add_test(tc1_1, round2);
+    tcase_add_test(tc1_1, round3);
+    tcase_add_test(tc1_1, round4);
+    tcase_add_test(tc1_1, round5);
+    tcase_add_test(tc1_1, round6);
+    tcase_add_test(tc1_1, round7);
+    tcase_add_test(tc1_1, round8);
 
     tcase_add_test(tc1_1, s21_floor_1);
     tcase_add_test(tc1_1, s21_floor_2);

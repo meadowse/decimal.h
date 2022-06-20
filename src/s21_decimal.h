@@ -33,7 +33,7 @@ s21_decimal s21_add(s21_decimal, s21_decimal);
 s21_decimal s21_sub(s21_decimal, s21_decimal);
 s21_decimal s21_mod(s21_decimal, s21_decimal);
 s21_decimal s21_floor(s21_decimal);
-s21_decimal s21_round(s21_decimal);
+int s21_round(s21_decimal, s21_decimal *)
 int s21_truncate(s21_decimal, s21_decimal*);
 int s21_negate(s21_decimal, s21_decimal*);
 
@@ -70,7 +70,6 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst);
 int getFloatExp(float *src);
 int getFloatSign(float *src);
 int s21_is_even(s21_decimal dec1);
-// int is_NAN(s21_decimal *dec1, s21_decimal *dec2);
 int s21_are_zero(s21_decimal, s21_decimal);
 int s21_are_inf(s21_decimal *, s21_decimal *);
 int s21_are_neg_inf(s21_decimal *, s21_decimal *);
