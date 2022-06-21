@@ -559,38 +559,24 @@ int s21_truncate(s21_decimal value, s21_decimal *res) {
   return ret;
 }
 
-/**
- * @brief Округление до целого числа
- * @param dec1 Число к округлению
- * @return Округленный децимал
- */
 int s21_round(s21_decimal value, s21_decimal *res) {
-// s21_decimal s21_round(s21_decimal dec1) {
-  int ret = 0, valid_value = (dec1.value_type == s21_usual ? 1 : 0);
-
-  s21_decimal res = {{0, 0, 0, 0}, s21_usual};
-  s21_decimal one = {{1, 0, 0, 0}, s21_usual};
-  s21_decimal five = {{5, 0, 0, 0}, s21_usual};
-
-  int sign = s21_getsign(&dec1);
-  s21_setsign(&dec1, 0);
-
-  s21_decimal trunc;
-  s21_truncate(dec1, &trunc);
-  s21_decimal buf = s21_sub(dec1, trunc);
-
+  int ret = 0, sign = s21_getsign(&value);
+  s21_decimal rem, whole, one = {{1, 0, 0, 0}, 0}, five = {{5, 0, 0, 0}, 0};
+  
+  s21_setsign(&value, 0);
+  s21_truncate(value, &whole);
+  rem = s21_sub(value, whole);
   s21_set_scale(&five, 1);
 
-  if (valid_value) {
-    res = trunc;
-    if (s21_gte(buf, five) == TRUE) {
-      res = s21_add(res, one);
-    }
-    s21_setsign(&res, sign);
+  if (!value.value_type) {
+    *res = whole;
+    if (!s21_gte(rem, five)) 
+      *res = s21_add(*res, one);
+    s21_setsign(res, sign);
   } else {
-    res.value_type = dec1.value_type;
+    res->value_type = value.value_type;
+    ret = 1;
   }
-
   return ret;
 }
 
