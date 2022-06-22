@@ -326,7 +326,7 @@ START_TEST(round7) {
 }
 END_TEST
 START_TEST(round8) {
-    s21_decimal src, res, pointfive = {{5, 0, 0, 0}, 0};
+    s21_decimal src, res;
     float a = -1.0 / 0.0;
     int b;
 
@@ -371,16 +371,6 @@ START_TEST(round8) {
     s21_round(src, &res);
     s21_from_decimal_to_int(res, &b);
     ck_assert_int_eq(b, -2);
-
-    src.bits[0] = 0b11111111111111111111111111111111;
-    src.bits[1] = 0b11111111111111111111111111111111;
-    src.bits[2] = 0b11111111111111111111111111111111;
-    src.bits[3] = 0;
-    s21_set_scale(&pointfive, 1);
-    src = s21_add(src, pointfive);
-    s21_round(src, &res);
-    ck_assert_float_eq(res.value_type, s21_infinity);
-    // TODO(alex): -inf
 }
 END_TEST
 

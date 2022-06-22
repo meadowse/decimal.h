@@ -6,7 +6,7 @@ void s21_set0bitstype(s21_decimal *ptr) {
 }
 
 int s21_get_bit(const s21_decimal value, int bit) {
-  return value.bits[bit / 32] & (1u << (bit % 32));
+  return value.bits[bit / 32] & (1u << (bit % 32)) ? 1 : 0;
 }
 
 void s21_set_bit(s21_decimal *value, int bit, int new_bit) {
