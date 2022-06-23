@@ -580,31 +580,24 @@ int s21_round(s21_decimal value, s21_decimal *res) {
   return ret;
 }
 
-/**
- * @brief Округление в сторону минус бесконечности
- * @param dec1 Число к округлению
- * @return Округленный децимал
- */
-s21_decimal s21_floor(s21_decimal dec1) {
-  s21_decimal dec1_copy = dec1;
-  int valid_value = (dec1.value_type == s21_usual ? 1 : 0);
-  int sign_dec1 = s21_getsign(&dec1);
-  int scale_dec1 = s21_get_scale(&dec1);
+int s21_floor(s21_decimal value, s21_decimal *res) {
+  s21_decimal tmp, dec1_copy = value, one = {{1, 0, 0, 0}, 0}, ten = {{10, 0, 0, 0}, 0};
+  int ret = 0, type = !value.value_type, sign = s21_getsign(&value), scale = s21_get_scale(&value);
 
-  s21_decimal one = {{1, 0, 0, 0}, s21_usual};
-  s21_decimal ten = {{10, 0, 0, 0}, s21_usual};
-  s21_decimal buf;
-  s21_set0bitstype(&buf);
-  for (int i = scale_dec1; i > 0; i--) dec1 = s21_div_bits(dec1, ten, &buf);
-  s21_set_scale(&dec1, 0);
+  for (int i = scale; i > 0; i--) 
+    value = s21_div_bits(value, ten, &tmp);
+  s21_set_scale(&value, 0);
 
-  if (s21_are_equal(dec1, dec1_copy) == TRUE) valid_value = 0;
-  if (sign_dec1 && valid_value) {
-    dec1 = s21_add(dec1, one);
-    s21_setsign(&dec1, 1);
+  if (!s21_are_equal(value, dec1_copy)) 
+    type = 0;
+  if (sign && type) {
+    value = s21_add(value, one);
+    s21_setsign(&value, 1);
   }
-
-  return dec1;
+  *res = value;
+  if (!type)
+    ret = 1;
+  return ret;
 }
 
 int s21_negate(s21_decimal value, s21_decimal *result) {
