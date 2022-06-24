@@ -507,6 +507,7 @@ START_TEST(floor8) {
 
     s21_from_float_to_decimal(a/b, &src);
     ck_assert_int_eq(s21_floor(src, &res), 1);
+    // printf("%d\n", res.value_type);
     ck_assert_int_eq(res.value_type, s21_nan);
 
     src.value_type = 0;
@@ -538,7 +539,42 @@ START_TEST(floor8) {
     ck_assert_int_eq(s21_floor(src, &res), 0);
     s21_from_decimal_to_float(res, &a);
     ck_assert_float_eq(a, floor(10.1));
-    printf("%lf %lf\n", a, floor(10.1));
+
+    s21_set0bits(&src);
+    src.value_type = 0;
+    s21_set0bits(&res);
+    res.value_type = 0;
+    s21_from_float_to_decimal(-10.1, &src);
+    ck_assert_int_eq(s21_floor(src, &res), 0);
+    s21_from_decimal_to_float(res, &a);
+    ck_assert_float_eq(a, floor(-10.1));
+
+    s21_set0bits(&src);
+    src.value_type = 0;
+    s21_set0bits(&res);
+    res.value_type = 0;
+    s21_from_float_to_decimal(0.1, &src);
+    ck_assert_int_eq(s21_floor(src, &res), 0);
+    s21_from_decimal_to_float(res, &a);
+    ck_assert_float_eq(a, floor(0.1));
+
+    s21_set0bits(&src);
+    src.value_type = 0;
+    s21_set0bits(&res);
+    res.value_type = 0;
+    s21_from_float_to_decimal(-0.1, &src);
+    ck_assert_int_eq(s21_floor(src, &res), 0);
+    s21_from_decimal_to_float(res, &a);
+    ck_assert_float_eq(a, floor(-0.1));
+
+    s21_set0bits(&src);
+    src.value_type = 0;
+    s21_set0bits(&res);
+    res.value_type = 0;
+    s21_from_float_to_decimal(0, &src);
+    ck_assert_int_eq(s21_floor(src, &res), 0);
+    s21_from_decimal_to_float(res, &a);
+    ck_assert_float_eq(a, floor(0));
 }
 END_TEST
 

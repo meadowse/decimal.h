@@ -584,6 +584,9 @@ int s21_floor(s21_decimal value, s21_decimal *res) {
   s21_decimal tmp, dec1_copy = value, one = {{1, 0, 0, 0}, 0}, ten = {{10, 0, 0, 0}, 0};
   int ret = 0, type = !value.value_type, sign = s21_getsign(&value), scale = s21_get_scale(&value);
 
+  if (!type) {
+    ret = 1;
+  } else {
   for (int i = scale; i > 0; i--) 
     value = s21_div_bits(value, ten, &tmp);
   s21_set_scale(&value, 0);
@@ -594,9 +597,9 @@ int s21_floor(s21_decimal value, s21_decimal *res) {
     value = s21_add(value, one);
     s21_setsign(&value, 1);
   }
+  }
   *res = value;
-  if (!type)
-    ret = 1;
+  
   return ret;
 }
 
