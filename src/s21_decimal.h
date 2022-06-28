@@ -2,14 +2,7 @@
 #define SRC_S21_DECIMAL_H_
 
 #include <math.h>
-#include <stdio.h>
 #include <string.h>
-#include <limits.h>
-#include <stdlib.h>
-
-#define TRUE 0
-#define FALSE 1
-#define SIGN 0x80000000
 
 typedef enum {
   s21_usual = 0,
@@ -25,9 +18,9 @@ typedef struct {
 } s21_decimal;
 
 typedef union {
-  int ui;
-  float fl;
-} floatbits;
+    int in;
+    float fl;
+  } int_float;
 
 s21_decimal s21_add(s21_decimal, s21_decimal);
 s21_decimal s21_sub(s21_decimal, s21_decimal);
@@ -48,19 +41,16 @@ int s21_get_scale(const s21_decimal *);
 void s21_level_scale(s21_decimal *, s21_decimal *);
 int s21_last_bit(s21_decimal);
 void s21_copy_bits(s21_decimal, s21_decimal *);
-void convert_to_addcode(s21_decimal *number_1);
+void convert_to_addcode(s21_decimal *);
 void s21_set_scale(s21_decimal *, int);
 void s21_shift_left(s21_decimal *, int);
 void s21_set0bitstype(s21_decimal *);
 void s21_set_bit(s21_decimal *, int, int);
-void s21_setsign(s21_decimal *varPtr, int sign);
+void s21_setsign(s21_decimal *, int);
 void s21_set0bits(s21_decimal *);
-s21_decimal s21_add_bits(s21_decimal *less, s21_decimal *more);
+s21_decimal s21_add_bits(s21_decimal *, s21_decimal *);
 s21_decimal s21_div_bits(s21_decimal, s21_decimal, s21_decimal *);
 s21_decimal check_boundary(s21_decimal, s21_decimal);
-
-#define SUCESS 0
-#define CONVERTING_ERROR 1
 
 int s21_from_int_to_decimal(int src, s21_decimal *dst);
 int s21_from_float_to_decimal(float src, s21_decimal *dst);
@@ -68,12 +58,10 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst);
 int s21_from_decimal_to_float(s21_decimal src, float *dst);
 
 int getFloatExp(float *src);
-int getFloatSign(float *src);
-int s21_is_even(s21_decimal dec1);
 int s21_are_zero(s21_decimal, s21_decimal);
 int s21_are_inf(s21_decimal *, s21_decimal *);
 int s21_are_neg_inf(s21_decimal *, s21_decimal *);
 int s21_are_neg(s21_decimal *, s21_decimal *);
-void s21_check_scale(s21_decimal *dec1, s21_decimal *dec2);
+void s21_check_scale(s21_decimal *, s21_decimal *);
 
 #endif  // SRC_S21_DECIMAL_H_

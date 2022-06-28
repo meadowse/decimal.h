@@ -327,7 +327,7 @@ START_TEST(round7) {
 END_TEST
 START_TEST(round8) {
     s21_decimal src, res;
-    float a = -1.0 / 0.0;
+    float a = -1.0 / 0.0, c = 0.0*2;
     int b;
 
     s21_from_float_to_decimal(a, &src);
@@ -338,7 +338,8 @@ START_TEST(round8) {
     ck_assert_int_eq(s21_round(src, &res), 1);
     ck_assert_int_eq(res.value_type, s21_infinity);
 
-    s21_from_float_to_decimal(0.0 / 0.0, &src);
+    a = 1*0.0;
+    s21_from_float_to_decimal(a / c, &src);
     ck_assert_int_eq(s21_round(src, &res), 1);
     ck_assert_int_eq(res.value_type, s21_nan);
 
@@ -356,7 +357,7 @@ START_TEST(round8) {
     s21_round(src, &res);
     s21_from_decimal_to_int(res, &b);
     ck_assert_int_eq(b, -8);
-    
+
     s21_from_float_to_decimal(0, &src);
     s21_round(src, &res);
     s21_from_decimal_to_int(res, &b);

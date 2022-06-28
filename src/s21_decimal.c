@@ -1,12 +1,12 @@
 #include "s21_decimal.h"
 
-void s21_set0bitstype(s21_decimal *ptr) {
-  s21_set0bits(ptr);
-  ptr->value_type = s21_usual;
+void s21_set0bitstype(s21_decimal *value) {
+  s21_set0bits(value);
+  value->value_type = 0;
 }
 
 int s21_get_bit(const s21_decimal value, int bit) {
-  return value.bits[bit / 32] & (1u << (bit % 32)) ? 1 : 0;
+  return (value.bits[bit / 32] & (1u << (bit % 32))) ? 1 : 0;
 }
 
 void s21_set_bit(s21_decimal *value, int bit, int new_bit) {
@@ -117,11 +117,12 @@ void s21_level_scale(s21_decimal *value1, s21_decimal *value2) {
 
 s21_decimal s21_add_bits(s21_decimal *value1, s21_decimal *value2) {
   s21_decimal res = {{0, 0, 0, 0}, 0};
-  int buffer = 0;
+
 
   if (s21_are_inf(value1, value2)) {
     res.value_type = s21_infinity;
   } else {
+  int buffer = 0;
   for (int i = 0; i < 96; i++) {
     int bit_value1 = s21_get_bit(*value1, i);
     int bit_value2 = s21_get_bit(*value2, i);
@@ -397,70 +398,41 @@ void s21_copy_bits(s21_decimal source, s21_decimal *dest) {
   dest->bits[2] = source.bits[2];
 }
 
-/**
- * @brief Конвертирует цисло из int в decimal
- * @param src Число типа int
- * @param dst Структура decimal'а
- * @return Результат работы, где 0 - это false, а 1 - это true
- */
-int s21_from_int_to_decimal(int src, s21_decimal *dst) {
-  char result = TRUE;
+int s21_from_int_to_decimal(int source, s21_decimal *dst) {
+  int res = 0;
   if (dst) {
-    dst->bits[0] = dst->bits[1] = dst->bits[2] = dst->bits[3] = 0;
-    dst->value_type = 0;
-    if (src < 0) {
+    s21_set0bitstype(dst);
+    if (source < 0)
       s21_setsign(dst, 1);
-      src *= -1;
-    }
-    dst->bits[0] = src;
-    dst->value_type = s21_usual;
+    dst->bits[0] = source;
+    dst->value_type = 0;
   } else {
-    result = FALSE;
+    res = 1;
   }
-  return result;
+  return res;
 }
 
-/**
- * @brief Конвертирует цисло из decimal в int
- * @param src Число decimal
- * @param dst Указатель на int
- * @return Результат работы, где 0 - это false, а 1 - это true
- */
-int s21_from_decimal_to_int(s21_decimal src, int *dst) {
-  int result = 1;
-  if (src.value_type == s21_usual) {
-    *dst = src.bits[0];
-    *dst *= s21_getsign(&src) ? -1 : 1;
-    *dst /= (int)pow(10, s21_get_scale(&src));
-    result = 0;
+int s21_from_decimal_to_int(s21_decimal source, int *dst) {
+  int res = 1;
+  if (!source.value_type) {
+    *dst = source.bits[0];
+    *dst *= s21_getsign(&source) ? -1 : 1;
+    *dst /= pow(10, s21_get_scale(&source));
+    res = 0;
   }
-  return result;
+  return res;
 }
 
-/**
- * @brief Получает знак в числе float
- * @param src Цисло float
- * @return Знак float'a
- */
-int getFloatSign(float *src) { return *(int *)src >> 31; }
+int getFloatExp(float *src) {
+  int_float mant;
+  mant.fl = *src;
+  return ((mant.in & ~0x80000000) >> 23) - 127;
+}
 
-/**
- * @brief Получает экспоненту из float'a
- * @param src число float
- * @return Возвращает экспоненту
- */
-int getFloatExp(float *src) { return ((*(int *)src & ~SIGN) >> 23) - 127; }
-
-/**
- * @brief Делает перевод из float в децимал
- * @param src Значение float
- * @param dst Значение децимал
- * @return Результат выполнения функции
- */
 int s21_from_float_to_decimal(float src, s21_decimal *dst) {
-  dst->bits[0] = dst->bits[1] = dst->bits[2] = dst->bits[3] = 0;
-  dst->value_type = s21_usual;
-  int result = FALSE, sign = getFloatSign(&src), exp = getFloatExp(&src);
+  s21_set0bitstype(dst);
+  int result = 1, exp = getFloatExp(&src);
+  unsigned sign = src < 0 ? 1 : 0;
 
   if (isinf(src) && !sign)
     dst->value_type = s21_infinity;
@@ -476,7 +448,7 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
     }
     temp = round(temp);
     if (off <= 28 && (exp > -94 && exp < 96)) {
-      floatbits mant;
+      int_float mant;
       temp = (float)temp;
       for (; fmod(temp, 10) == 0 && off > 0; off--, temp /= 10) {
       }
@@ -484,9 +456,9 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
       exp = getFloatExp(&mant.fl);
       dst->bits[exp / 32] |= 1 << exp % 32;
       for (int i = exp - 1, j = 22; j >= 0; i--, j--)
-        if ((mant.ui & (1 << j)) != 0) dst->bits[i / 32] |= 1 << i % 32;
+        if ((mant.in & (1 << j)) != 0) dst->bits[i / 32] |= 1 << i % 32;
       dst->bits[3] = (sign << 31) | (off << 16);
-      result = TRUE;
+      result = 0;
     }
   }
   return result;
@@ -494,19 +466,21 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
 
 // TODO(alex): optimiation.
 int s21_from_decimal_to_float(s21_decimal src, float *dst) {
-  int result = FALSE;
+  int result = 1;
   float a = 1*0.0, b = 0.0*2;
   if (src.value_type == s21_usual) {
     double temp = 0;
     int off = 0;
-    for (int i = 0; i < 96; i++)
-      if ((src.bits[i / 32] & (1 << i % 32)) != 0) temp += pow(2, i);
-    if ((off = (src.bits[3] & ~SIGN) >> 16) > 0) {
+    for (unsigned i = 0; i < 96; i++)
+      if (s21_get_bit(src, i))
+        temp += pow(2, i);
+    if ((off = (src.bits[3] & ~0x80000000) >> 16) > 0) {
       for (int i = off; i > 0; i--) temp /= 10.0;
     }
     *dst = (float)temp;
-    *dst *= src.bits[3] >> 31 ? -1 : 1;
-    result = TRUE;
+    // *dst *= src.bits[3] >> 31 ? -1 : 1;
+    *dst *= s21_getsign(&src) ? -1 : 1;
+    result = 0;
   }
   if (src.value_type == s21_infinity)
     *dst = 1.0 / 0.0;
@@ -562,7 +536,7 @@ int s21_truncate(s21_decimal value, s21_decimal *res) {
 int s21_round(s21_decimal value, s21_decimal *res) {
   int ret = 0, sign = s21_getsign(&value);
   s21_decimal rem, whole, one = {{1, 0, 0, 0}, 0}, five = {{5, 0, 0, 0}, 0};
-  
+
   s21_setsign(&value, 0);
   s21_truncate(value, &whole);
   rem = s21_sub(value, whole);
@@ -570,7 +544,7 @@ int s21_round(s21_decimal value, s21_decimal *res) {
 
   if (!value.value_type) {
     *res = whole;
-    if (!s21_gte(rem, five)) 
+    if (!s21_gte(rem, five))
       *res = s21_add(*res, one);
     s21_setsign(res, sign);
   } else {
@@ -587,11 +561,11 @@ int s21_floor(s21_decimal value, s21_decimal *res) {
   if (!type) {
     ret = 1;
   } else {
-  for (int i = scale; i > 0; i--) 
+  for (int i = scale; i > 0; i--)
     value = s21_div_bits(value, ten, &tmp);
   s21_set_scale(&value, 0);
 
-  if (!s21_are_equal(value, dec1_copy)) 
+  if (!s21_are_equal(value, dec1_copy))
     type = 0;
   if (sign && type) {
     value = s21_add(value, one);
@@ -599,7 +573,7 @@ int s21_floor(s21_decimal value, s21_decimal *res) {
   }
   }
   *res = value;
-  
+
   return ret;
 }
 
