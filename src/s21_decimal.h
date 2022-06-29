@@ -41,7 +41,7 @@ int s21_get_scale(const s21_decimal *);
 void s21_level_scale(s21_decimal *, s21_decimal *);
 int s21_last_bit(s21_decimal);
 void s21_copy_bits(s21_decimal, s21_decimal *);
-void convert_to_addcode(s21_decimal *);
+void to_addcode(s21_decimal *);
 void s21_set_scale(s21_decimal *, int);
 void s21_shift_left(s21_decimal *, int);
 void s21_set0bitstype(s21_decimal *);

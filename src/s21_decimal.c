@@ -118,7 +118,6 @@ void s21_level_scale(s21_decimal *value1, s21_decimal *value2) {
 s21_decimal s21_add_bits(s21_decimal *value1, s21_decimal *value2) {
   s21_decimal res = {{0, 0, 0, 0}, 0};
 
-
   if (s21_are_inf(value1, value2)) {
     res.value_type = s21_infinity;
   } else {
@@ -478,7 +477,6 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
       for (int i = off; i > 0; i--) temp /= 10.0;
     }
     *dst = (float)temp;
-    // *dst *= src.bits[3] >> 31 ? -1 : 1;
     *dst *= s21_getsign(&src) ? -1 : 1;
     result = 0;
   }
