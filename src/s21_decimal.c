@@ -357,8 +357,7 @@ int s21_is_greater(s21_decimal value1, s21_decimal value2) {
   return is_greater;  // 0 - больше, 1 - меньше
 }
 
-int s21_is_less(s21_decimal dec1, s21_decimal dec2)
-{
+int s21_is_less(s21_decimal dec1, s21_decimal dec2) {
     return !(s21_is_greater_or_equal(dec1, dec2));
 }
 
@@ -394,8 +393,7 @@ int s21_is_equal(s21_decimal value1, s21_decimal value2) {
   return (is_equal != 1) ? 0 : 1;
 }
 
-int s21_is_not_equal(s21_decimal dec1, s21_decimal dec2)
-{
+int s21_is_not_equal(s21_decimal dec1, s21_decimal dec2) {
     return !(s21_is_equal(dec1, dec2));
 }
 
