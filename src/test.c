@@ -3,6 +3,111 @@
 
 #include "s21_decimal.h"
 
+START_TEST(s21_mod_1) {
+  s21_decimal src1, src2, res_mod;
+  int a = 3;
+  int b = 2;
+  int res_origin = a % b;
+  int res = 0;
+  s21_from_int_to_decimal(a, &src1);
+  s21_from_int_to_decimal(b, &src2);
+  res_mod = s21_mod(src1, src2);
+  s21_from_decimal_to_int(res_mod, &res);
+  ck_assert_int_eq(res_origin, res);
+}
+END_TEST
+START_TEST(s21_mod_2) {
+  s21_decimal src1, src2, res_mod;
+  int a = -98765;
+  int b = 1234;
+  int res_origin = a % b;
+  int res = 0;
+  s21_from_int_to_decimal(a, &src1);
+  s21_from_int_to_decimal(b, &src2);
+  res_mod = s21_mod(src1, src2);
+  s21_from_decimal_to_int(res_mod, &res);
+  ck_assert_int_eq(res_origin, res);
+}
+END_TEST
+START_TEST(s21_mod_3) {
+  s21_decimal src1, src2, res_mod;
+  int a = 30198;
+  int b = 20210;
+  int res_origin = a % b;
+  int res = 0;
+  s21_from_int_to_decimal(a, &src1);
+  s21_from_int_to_decimal(b, &src2);
+  res_mod = s21_mod(src1, src2);
+  s21_from_decimal_to_int(res_mod, &res);
+  ck_assert_int_eq(res_origin, res);
+}
+END_TEST
+START_TEST(s21_mod_4) {
+  s21_decimal src1, src2, res_mod;
+  int a = -98765;
+  int b = -1234;
+  int res_origin = a % b;
+  int res = 0;
+  s21_from_int_to_decimal(a, &src1);
+  s21_from_int_to_decimal(b, &src2);
+  res_mod = s21_mod(src1, src2);
+  s21_from_decimal_to_int(res_mod, &res);
+  ck_assert_int_eq(res_origin, res);
+}
+END_TEST
+START_TEST(s21_mod_5) {
+  s21_decimal src1, src2, res_mod;
+  int a = 98765;
+  int b = 127234;
+  int res_origin = a % b;
+  int res = 0;
+  s21_from_int_to_decimal(a, &src1);
+  s21_from_int_to_decimal(b, &src2);
+  res_mod = s21_mod(src1, src2);
+  s21_from_decimal_to_int(res_mod, &res);
+  ck_assert_int_eq(res_origin, res);
+}
+END_TEST
+START_TEST(s21_mod_6) {
+  s21_decimal src1, src2, res_mod;
+  int a = 342576;
+  int b = 1542134;
+  int res_origin = a % b;
+  int res = 0;
+  s21_from_int_to_decimal(a, &src1);
+  s21_from_int_to_decimal(b, &src2);
+  res_mod = s21_mod(src1, src2);
+  s21_from_decimal_to_int(res_mod, &res);
+  ck_assert_int_eq(res_origin, res);
+}
+END_TEST
+START_TEST(s21_mod_7) {
+  s21_decimal src1, src2, res_mod;
+  float a = 1.2;
+  float b = 0.3;
+  float res_origin = fmod(a, b);
+  float res = 0.0;
+  s21_from_float_to_decimal(a, &src1);
+  s21_from_float_to_decimal(b, &src2);
+  res_mod = s21_mod(src1, src2);
+  s21_from_decimal_to_float(res_mod, &res);
+  ck_assert_float_eq(res_origin, res);
+}
+END_TEST
+START_TEST(s21_mod_8) {
+  s21_decimal src1, src2, res_mod;
+  float a = 1.2;
+  int b = 3;
+  float res_origin = fmod(a, b);
+  float res = 0;
+  s21_from_float_to_decimal(a, &src1);
+  s21_from_int_to_decimal(b, &src2);
+  res_mod = s21_mod(src1, src2);
+  s21_from_decimal_to_float(res_mod, &res);
+  ck_assert_float_eq(res_origin, res);
+}
+END_TEST
+
 START_TEST(truncate1) {
   s21_decimal src, result, result2;
   src.value_type = s21_usual;
@@ -675,6 +780,15 @@ int main(void) {
 
   TCase *tc1_1 = tcase_create("tests");
   suite_add_tcase(s1, tc1_1);
+
+  tcase_add_test(tc1_1, s21_mod_1);
+  tcase_add_test(tc1_1, s21_mod_2);
+  tcase_add_test(tc1_1, s21_mod_3);
+  tcase_add_test(tc1_1, s21_mod_4);
+  tcase_add_test(tc1_1, s21_mod_5);
+  tcase_add_test(tc1_1, s21_mod_6);
+  tcase_add_test(tc1_1, s21_mod_7);
+  tcase_add_test(tc1_1, s21_mod_8);
 
   tcase_add_test(tc1_1, truncate1);
   tcase_add_test(tc1_1, truncate2);

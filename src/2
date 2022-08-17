@@ -1,0 +1,26 @@
+int s21_is_equal(s21_decimal value1, s21_decimal value2) {
+  int is_equal = -1;
+  if ((value1.value_type == s21_nan || value2.value_type == s21_nan)) is_equal = 1;
+
+  if (is_equal == -1) {
+    if (!s21_are_zero(value1, value2)) is_equal = 0;
+
+    int if_inf = s21_are_inf(&value1, &value2);
+    if (if_inf == 1 || if_inf == -1) is_equal = 1;
+    if (if_inf == 2) is_equal = 0;
+
+    int if_neg_inf = s21_are_neg_inf(&value1, &value2);
+    if (if_neg_inf == 1 || if_neg_inf == -1) is_equal = 1;
+    if (if_neg_inf == 2) is_equal = 0;
+  }
+
+  if (is_equal == -1) {
+    if (s21_are_neg(&value1, &value2)) is_equal = 1;
+    s21_check_scale(&value1, &value2);
+  }
+
+  for (int i = 95; i >= 0 && is_equal == -1; i--)
+    if (s21_get_bit(value1, i) != s21_get_bit(value2, i))
+      is_equal = 1;
+  return (is_equal != 1) ? 0 : 1;
+}

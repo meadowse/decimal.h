@@ -35,10 +35,10 @@ s21_decimal.a: clean
 	@ranlib $(LIBA)
 
 gcov_report: s21_decimal.a
-	@$(CC) $(CFLAGS) $(GCOV_LIBS) test.c $(SOURCES) $(LIBA) -L. $(LIBA) $(TST_LIBS) -o $(BUILD_PATH)$(EXE)
-	@$(BUILD_PATH)$(EXE)
-	@lcov -t "test" -c -d $(BUILD_PATH) --output-file $(BUILD_PATH)coverage.info
-	@genhtml $(BUILD_PATH)coverage.info --output-directory $(BUILD_PATH)report/
+	$(CC) $(CFLAGS) $(GCOV_LIBS) test.c $(SOURCES) $(LIBA) -L. $(LIBA) $(TST_LIBS) -o $(BUILD_PATH)$(EXE)
+	$(BUILD_PATH)$(EXE)
+	lcov -t "test" -c -d $(BUILD_PATH) --output-file $(BUILD_PATH)coverage.info
+	genhtml $(BUILD_PATH)coverage.info --output-directory $(BUILD_PATH)report/
 
 check:
 	@$(LEAKS) ./test.out
