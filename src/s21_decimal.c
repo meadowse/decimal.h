@@ -1,13 +1,12 @@
 /*
 to do:
-- другие функции - расширить тест-кейсы
+- операторы сравнения сделать тест-кейсы s21_is_less, s21_is_greater,
+s21_is_greater_or_equal, s21_is_equal, , s21_is_less_or_equal, s21_is_not_equal
 - функции преобразования в/из int, float - проверить на nan, inf, inf, max, min,
 возвращаемое значение функции
-- операторы сравнения  s21_is_less, s21_is_greater,
-s21_is_greater_or_equal, s21_is_equal, , s21_is_less_or_equal, s21_is_not_equal
-- сделать тест-кейсы
-- арифметические операторы есть s21_add, s21_sub - сделать тест-кейсы, нет
-s21_mod, s21_mul, s21_div (есть пример)
+- арифметические операторы сделать тест-кейсы s21_add, s21_sub, s21_mod,
+s21_mul, s21_div
+- другие функции расширить тест-кейсы
 - cppcheck --enable=all --bug-hunting - задачка со * поустранять warnings
 */
 
@@ -666,6 +665,121 @@ s21_decimal s21_mul(s21_decimal number_1, s21_decimal number_2) {
     s21_set0bits(&res);
   }
   return res;
+}
+
+s21_decimal s21_div(s21_decimal divident, s21_decimal divisor) {
+  s21_decimal result;
+  s21_set0bitstype(&result);
+
+  s21_decimal zero = {{0, 0, 0, 0}, s21_usual};
+  int divsr_is_normal_plus =
+      s21_is_greater(divisor, zero) == 0 && divisor.value_type == s21_usual ? 1
+                                                                            : 0;
+
+  int divsr_is_normal_minus =
+      s21_is_less(divisor, zero) == 0 && divisor.value_type == s21_usual ? 1
+                                                                         : 0;
+
+  int flag = 1;  // для отлова ситуации с normal/+-inf
+
+  // (vt_dec1 == s21_NAN ||
+  //  vt_dec2 == s21_NAN)
+  if (divident.value_type == s21_nan || divisor.value_type == s21_nan)
+    //  if (is_NAN(&divident, &divisor) == 0) {
+    result.value_type = s21_nan;
+  // }
+  else if (s21_is_equal(divisor, zero) == 0 &&
+           s21_is_less(divident, zero) == 0) {
+    //    -x/0
+    result.value_type = s21_neg_infinity;
+  } else if (s21_is_equal(divisor, zero) == 0 &&
+             s21_is_greater(divident, zero) == 0) {
+    //   +x/0
+    result.value_type = s21_infinity;
+  } else if (s21_is_equal(divisor, zero) == 0 &&
+             s21_is_equal(divident, zero) == 0) {
+    //    0/0
+    result.value_type = s21_nan;
+  } else if ((divident.value_type == s21_infinity ||
+              divident.value_type == s21_neg_infinity) &&
+             (divisor.value_type == s21_infinity ||
+              divisor.value_type == s21_neg_infinity)) {
+    //    +-inf/(+-inf)
+    result.value_type = s21_nan;
+  } else if ((divident.value_type == s21_infinity && divsr_is_normal_plus) ||
+             (divident.value_type == s21_neg_infinity &&
+              divsr_is_normal_minus)) {
+    //    +inf / +normal
+    //    -inf / -normal
+    result.value_type = s21_infinity;
+  } else if ((divident.value_type == s21_infinity && divsr_is_normal_minus) ||
+             (divident.value_type == s21_neg_infinity &&
+              divsr_is_normal_plus)) {
+    //    +inf / -normal = -inf
+    //    -inf / +normal
+    result.value_type = s21_neg_infinity;
+  } else if (divident.value_type == s21_usual &&
+             (divisor.value_type == s21_infinity ||
+              divisor.value_type == s21_neg_infinity)) {
+    //    +-normal / +-inf = 0
+    result = zero;
+    flag = 0;
+  }
+
+  if (result.value_type == s21_usual && flag) {
+    int beginScale = s21_get_scale(&divident) - s21_get_scale(&divisor);
+    int resultSign = s21_getsign(&divident) != s21_getsign(&divisor);
+
+    s21_decimal remainder, tmp;
+
+    // для предсказуемости зачищаем
+    s21_set_scale(&divisor, 0);
+    s21_set_scale(&divident, 0);
+    s21_setsign(&divisor, 0);
+    s21_setsign(&divident, 0);
+
+    // первое целочисленное деление
+    tmp = s21_div_bits(divident, divisor, &remainder);
+    s21_copy_bits(tmp, &result);
+
+    // 1/10 от макс значения децимал - граница от переполнения
+    s21_decimal border_value = {{-1, -1, -1, 0}, s21_usual};
+    s21_decimal ten = {{10, 0, 0, 0}, s21_usual};
+
+    s21_set_scale(&border_value, 1);
+    int inside_scale = 0;
+
+    // делим, пока не достигнем максимальной точности или пока не поделим без
+    // остатка
+
+    for (; inside_scale <= 27 && s21_is_equal(remainder, zero) == 1;) {
+      if (s21_is_less(result, border_value) == 1) {
+        break;
+      }
+      remainder = s21_mul(remainder, ten);
+      tmp = s21_div_bits(remainder, divisor, &remainder);
+      result = s21_mul(result, ten);
+      result = s21_add(result, tmp);
+      inside_scale++;
+    }
+
+    s21_decimal musor;
+    // вводим итоговый скейл в требуемые границы
+    int endScale = beginScale + inside_scale;
+    for (; endScale > 28;) {
+      result = s21_div_bits(result, ten, &musor);
+      endScale--;
+    }
+    for (; endScale < 0;) {
+      result = s21_mul(result, ten);
+      endScale++;
+    }
+
+    s21_set_scale(&result, endScale);
+    s21_setsign(&result, resultSign);
+  }
+
+  return result;
 }
 
 s21_decimal s21_mod(s21_decimal a, s21_decimal b) {

@@ -25,6 +25,7 @@ typedef union {
 s21_decimal s21_add(s21_decimal, s21_decimal);
 s21_decimal s21_sub(s21_decimal, s21_decimal);
 s21_decimal s21_mul(s21_decimal, s21_decimal);
+s21_decimal s21_div(s21_decimal, s21_decimal);
 s21_decimal s21_mod(s21_decimal, s21_decimal);
 
 int s21_floor(s21_decimal, s21_decimal *);

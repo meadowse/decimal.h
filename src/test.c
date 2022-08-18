@@ -3,6 +3,39 @@
 
 #include "s21_decimal.h"
 
+START_TEST(is_less) {
+  s21_decimal dst1, dst2;
+
+  s21_from_float_to_decimal(1.2345, &dst1);
+  s21_from_float_to_decimal(1.2, &dst2);
+  ck_assert_int_eq(s21_is_less(dst1, dst2), 1);  // 1.2345 < 1.2
+  ck_assert_int_eq(s21_is_less(dst2, dst1), 0);  // 1.2 < 1.2345
+
+  s21_negate(dst1, &dst1);
+  s21_negate(dst2, &dst2);
+  ck_assert_int_eq(s21_is_less(dst1, dst2), 0);  // -1.2345 < -1.2
+  ck_assert_int_eq(s21_is_less(dst2, dst1), 1);  // -1.2 < -1.2345
+
+  s21_negate(dst1, &dst1);
+  ck_assert_int_eq(s21_is_less(dst1, dst2), 1);  //  1.2345 < -1.2 fail
+  ck_assert_int_eq(s21_is_less(dst2, dst1), 0);  //  -1.2 < 1.2345 fail
+
+  s21_from_float_to_decimal(0.0, &dst1);
+  s21_from_float_to_decimal(0.0, &dst2);
+  ck_assert_int_eq(s21_is_less(dst1, dst2), 1);  // 0 < 0
+
+  dst1.value_type = s21_infinity;
+  dst2.value_type = s21_usual;
+  ck_assert_int_eq(s21_is_less(dst1, dst2), 1);  // +INFINITY < 0
+  ck_assert_int_eq(s21_is_less(dst2, dst1), 0);  // 0 < +INFINITY
+
+  dst1.value_type = s21_neg_infinity;
+  dst2.value_type = s21_usual;
+  ck_assert_int_eq(s21_is_less(dst1, dst2), 0);  // -INFINITY < 0
+  ck_assert_int_eq(s21_is_less(dst2, dst1), 1);  // 0 < -INFINITY
+}
+END_TEST
+
 START_TEST(s21_mod_1) {
   s21_decimal src1, src2, res_mod;
   int a = 3;
@@ -18,7 +51,7 @@ START_TEST(s21_mod_1) {
 END_TEST
 START_TEST(s21_mod_2) {
   s21_decimal src1, src2, res_mod;
-  int a = -98765;
+  int a = 98765;
   int b = 1234;
   int res_origin = a % b;
   int res = 0;
@@ -26,6 +59,7 @@ START_TEST(s21_mod_2) {
   s21_from_int_to_decimal(b, &src2);
   res_mod = s21_mod(src1, src2);
   s21_from_decimal_to_int(res_mod, &res);
+  // printf("%d % d \n", res_origin, res);
   ck_assert_int_eq(res_origin, res);
 }
 END_TEST
@@ -780,6 +814,8 @@ int main(void) {
 
   TCase *tc1_1 = tcase_create("tests");
   suite_add_tcase(s1, tc1_1);
+
+  tcase_add_test(tc1_1, is_less);
 
   tcase_add_test(tc1_1, s21_mod_1);
   tcase_add_test(tc1_1, s21_mod_2);
