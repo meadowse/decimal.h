@@ -2,6 +2,7 @@
 #define SRC_S21_DECIMAL_H_
 
 #include <math.h>
+#include <stdio.h>  // remove
 #include <string.h>
 
 typedef enum {
@@ -55,7 +56,8 @@ void s21_setsign(s21_decimal *, int);
 void s21_set0bits(s21_decimal *);
 s21_decimal s21_add_bits(s21_decimal *, s21_decimal *);
 s21_decimal s21_div_bits(s21_decimal, s21_decimal, s21_decimal *);
-s21_decimal check_boundary(s21_decimal, s21_decimal);
+s21_decimal s21_check_boundary(s21_decimal, s21_decimal);
+void s21_print(s21_decimal);
 
 int s21_from_int_to_decimal(int src, s21_decimal *dst);
 int s21_from_float_to_decimal(float src, s21_decimal *dst);

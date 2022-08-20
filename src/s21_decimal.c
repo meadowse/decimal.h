@@ -1,14 +1,3 @@
-/*
-to do:
-- операторы сравнения сделать тест-кейсы s21_is_less, s21_is_greater,
-s21_is_greater_or_equal, s21_is_equal, , s21_is_less_or_equal, s21_is_not_equal
-- функции преобразования в/из int, float - проверить на nan, inf, inf, max, min,
-возвращаемое значение функции
-- арифметические операторы сделать тест-кейсы s21_add, s21_sub, s21_mod,
-s21_mul, s21_div
-- другие функции расширить тест-кейсы
-- cppcheck --enable=all --bug-hunting - задачка со * поустранять warnings
-*/
 
 #include "s21_decimal.h"
 
@@ -31,16 +20,27 @@ void s21_set_bit(s21_decimal *value, int bit, int new_bit) {
 }
 
 void s21_setsign(s21_decimal *value, int sign) {
-  if (sign == 1) {
-    value->bits[3] |= 0x80000000;
+  //   if (sign == 1) {
+  //     value->bits[3] |= 0x80000000;
+  //   } else {
+  //     value->bits[3] &= ~0x80000000;
+  //   }
+  // }
+  // del
+  unsigned int mask = 1u << 31;
+  if (sign != 0) {
+    value->bits[3] |= mask;
   } else {
-    value->bits[3] &= ~0x80000000;
+    value->bits[3] &= ~mask;
   }
 }
 
 int s21_getsign(const s21_decimal *value) {
-  return !!(value->bits[3] &
-            0x80000000);  // use !! to get 1 in any event except 0
+  //   return !!(value->bits[3] &
+  //             0x80000000);  // use !! to get 1 in any event except 0
+  // }
+  unsigned int mask = 1u << 31;
+  return !!(value->bits[3] & mask);
 }
 
 int s21_get_scale(const s21_decimal *value) {
@@ -174,7 +174,7 @@ s21_decimal s21_add_bits(s21_decimal *value1, s21_decimal *value2) {
   return res;
 }
 
-s21_decimal check_boundary(s21_decimal value1, s21_decimal value2) {
+s21_decimal s21_check_boundary(s21_decimal value1, s21_decimal value2) {
   s21_decimal res = {{0, 0, 0, 0}, 0};
 
   res.value_type = value1.value_type > value2.value_type ? value1.value_type
@@ -187,7 +187,7 @@ s21_decimal check_boundary(s21_decimal value1, s21_decimal value2) {
 }
 
 s21_decimal s21_add(s21_decimal value1, s21_decimal value2) {
-  s21_decimal res = check_boundary(value1, value2);
+  s21_decimal res = s21_check_boundary(value1, value2);
 
   if (res.value_type == s21_usual || res.value_type == s21_ADDCODE) {
     if (!s21_getsign(&value1) && !s21_getsign(&value2)) {  // positive
@@ -391,7 +391,13 @@ int s21_is_less(s21_decimal dec1, s21_decimal dec2) {
 }
 
 int s21_is_less_or_equal(s21_decimal dec1, s21_decimal dec2) {
-  return !(s21_is_greater(dec1, dec2));
+  int ret;
+  if (dec1.value_type == s21_nan || dec2.value_type == s21_nan) {
+    ret = 1;
+  } else {
+    ret = !(s21_is_greater(dec1, dec2));
+  }
+  return ret;
 }
 
 int s21_is_equal(s21_decimal value1, s21_decimal value2) {
@@ -436,11 +442,21 @@ void s21_copy_bits(s21_decimal source, s21_decimal *dest) {
   dest->bits[2] = source.bits[2];
 }
 
+void s21_print(s21_decimal value) {
+  for (int i = 127; i >= 0; i--) {
+    printf("%d:%d ", i, s21_get_bit(value, i));
+  }
+  printf("\n");
+}
+
 int s21_from_int_to_decimal(int source, s21_decimal *dst) {
   int res = 0;
   if (dst) {
     s21_set0bitstype(dst);
-    if (source < 0) s21_setsign(dst, 1);
+    if (source < 0) {
+      s21_setsign(dst, 1);
+      source *= -1;
+    }
     dst->bits[0] = source;
     dst->value_type = 0;
   } else {
@@ -451,7 +467,7 @@ int s21_from_int_to_decimal(int source, s21_decimal *dst) {
 
 int s21_from_decimal_to_int(s21_decimal source, int *dst) {
   int res = 1;
-  if (!source.value_type) {
+  if (source.value_type == 0) {
     *dst = source.bits[0];
     *dst *= s21_getsign(&source) ? -1 : 1;
     *dst /= pow(10, s21_get_scale(&source));
@@ -594,6 +610,9 @@ s21_decimal check_for_mul(s21_decimal value1, s21_decimal value2) {
 
 s21_decimal s21_mul(s21_decimal number_1, s21_decimal number_2) {
   s21_decimal res = check_for_mul(number_1, number_2);
+  // int res2 = 0;
+  // s21_from_decimal_to_int(res, &res2);
+  // printf("res0 %d\n", s21_getsign(&res));
 
   if (res.value_type == s21_usual) {
     int sign_result;
@@ -603,7 +622,7 @@ s21_decimal s21_mul(s21_decimal number_1, s21_decimal number_2) {
     } else {
       sign_result = 0;
     }
-
+    // printf("sign %d\n", sign_result);
     int last_bit_1 = s21_last_bit(number_1);
     s21_decimal tmp_res = {{0, 0, 0, 0}, s21_usual};
 
@@ -658,7 +677,26 @@ s21_decimal s21_mul(s21_decimal number_1, s21_decimal number_2) {
     }
     int scale = s21_get_scale(&number_1) + s21_get_scale(&number_2);
     s21_set_scale(&res, scale);
+
+    // s21_setsign(&res, 0);
+
+    // s21_decimal s6 = {{0, 0, 0, 7}, 0};
+    // s21_setsign(&s6, 1);
+    // printf("sign %d eq %d\n", s21_getsign(&res), s21_is_equal(res, s6));
+    // int res2 = 0;
+    // s21_from_decimal_to_int(res, &res2);
+    // printf("res %d\n", res2);
+    // printf("sign %d\n", sign_result);
+
+    // s21_setsign(&res, 1);
+    // s21_from_decimal_to_int(res, &res2);
+    // printf("res %d\n", res2);
+
     s21_setsign(&res, sign_result);
+    // // s21_setsign(&res, 1);
+
+    // s21_from_decimal_to_int(res, &res2);
+    // printf("res2 %d\n", res2);
   }
 
   if (res.value_type != s21_usual) {
@@ -785,11 +823,26 @@ s21_decimal s21_div(s21_decimal divident, s21_decimal divisor) {
 s21_decimal s21_mod(s21_decimal a, s21_decimal b) {
   s21_decimal res;
   s21_decimal tmp;
-  s21_set0bitstype(&tmp);  //  на всякий случай?
-  tmp = s21_div(a, b);
-  s21_truncate(tmp, &tmp);  // todo(alex): rest
-  tmp = s21_mul(tmp, b);
-  res = s21_sub(a, tmp);
+
+  if (b.value_type == s21_nan) {
+    res.value_type = s21_nan;
+  } else {
+    // int i;
+    s21_set0bitstype(&tmp);  //  на всякий случай?
+    tmp = s21_div(a, b);
+    // s21_from_decimal_to_int(tmp, &i);
+    // printf("%d\n", i);
+
+    s21_truncate(tmp, &tmp);  // todo(alex): rest
+    // s21_from_decimal_to_int(tmp, &i);
+    // printf("%d\n", i);
+
+    tmp = s21_mul(tmp, b);
+    // s21_from_decimal_to_int(tmp, &i);
+    // printf("%d\n", i);
+
+    res = s21_sub(a, tmp);
+  }
   return res;
 }
 
