@@ -1,6 +1,7 @@
 #ifndef SRC_S21_DECIMAL_H_
 #define SRC_S21_DECIMAL_H_
 
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>  // remove
 #include <string.h>

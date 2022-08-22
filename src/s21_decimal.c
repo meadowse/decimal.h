@@ -467,7 +467,12 @@ int s21_from_int_to_decimal(int source, s21_decimal *dst) {
 
 int s21_from_decimal_to_int(s21_decimal source, int *dst) {
   int res = 1;
-  if (source.value_type == 0) {
+  s21_decimal i_max = {{INT_MAX, 0, 0, 0}, 0}, i_min = i_max,
+              one = {{1, 0, 0, 0}, 0};
+  i_min = s21_add(i_max, one);
+  s21_setsign(&i_min, 1);
+  if ((source.value_type == 0) && (s21_is_greater(source, i_max)) &&
+      (s21_is_less(source, i_min))) {
     *dst = source.bits[0];
     *dst *= s21_getsign(&source) ? -1 : 1;
     *dst /= pow(10, s21_get_scale(&source));
