@@ -476,7 +476,18 @@ START_TEST(from_float_to_decimal6) {
   s21_from_decimal_to_float(val, &dst);
   ck_assert_float_eq(0.0000001, dst);
 
-  // todo: FLT_MAX
+  int ret;
+  ret = s21_from_float_to_decimal(FLT_MAX, &val);
+  ck_assert_int_eq(1, ret);
+
+  ret = s21_from_float_to_decimal(FLT_MIN, &val);
+  ck_assert_int_eq(1, ret);
+
+  ret = s21_from_float_to_decimal(-FLT_MAX, &val);
+  ck_assert_int_eq(1, ret);
+
+  ret = s21_from_float_to_decimal(-FLT_MIN, &val);
+  ck_assert_int_eq(1, ret);
 }
 END_TEST
 START_TEST(from_float_to_decimal7) {
@@ -510,6 +521,115 @@ START_TEST(from_float_to_decimal9) {
   ck_assert_int_eq(val.bits[2], 0);
   ck_assert_int_eq(val.bits[3], 0);
   ck_assert_int_eq(val.value_type, s21_nan);
+}
+END_TEST
+
+START_TEST(decimal_to_float1) {
+  s21_decimal src;
+  int result = 0;
+  float number = 0.0;
+  src.value_type = 0;
+  src.bits[0] = 18122;
+  src.bits[1] = 0;
+  src.bits[2] = 0;
+  src.bits[3] = 2147680256;
+  result = s21_from_decimal_to_float(src, &number);
+  ck_assert_float_eq(number, -18.122);
+  ck_assert_int_eq(result, 0);
+}
+END_TEST
+START_TEST(decimal_to_float2) {
+  s21_decimal src;
+  int result = 0;
+  float number = 0.0;
+  src.value_type = 0;
+  src.bits[0] = 1812;
+  src.bits[1] = 0;
+  src.bits[2] = 0;
+  src.bits[3] = 2147483648;
+  result = s21_from_decimal_to_float(src, &number);
+  ck_assert_float_eq(number, -1812);
+  ck_assert_int_eq(result, 0);
+}
+END_TEST
+START_TEST(decimal_to_float3) {
+  s21_decimal src;
+  int result = 0;
+  float number = 0.0;
+  src.value_type = 0;
+  src.bits[0] = 0XFFFFFF;
+  src.bits[1] = 0;
+  src.bits[2] = 0;
+  src.bits[3] = 0;
+  result = s21_from_decimal_to_float(src, &number);
+  ck_assert_float_eq(number, 16777215);
+  ck_assert_int_eq(result, 0);
+}
+END_TEST
+START_TEST(decimal_to_float4) {
+  s21_decimal src;
+  int result = 0;
+  float number = 0.0;
+  src.value_type = 0;
+  src.bits[0] = 23450987;
+  src.bits[1] = 0;
+  src.bits[2] = 0;
+  src.bits[3] = 2147745792;
+  result = s21_from_decimal_to_float(src, &number);
+  ck_assert_float_eq(number, -2345.0987);
+  ck_assert_int_eq(result, 0);
+}
+END_TEST
+START_TEST(decimal_to_float5) {
+  s21_decimal src;
+  int result = 0;
+  float number = 0.0;
+  src.value_type = 0;
+  src.bits[0] = 4294967295;
+  src.bits[1] = 4294967295;
+  src.bits[2] = 0;
+  src.bits[3] = 0;
+  result = s21_from_decimal_to_float(src, &number);
+  ck_assert_float_eq(number, 0xFFFFFFFFFFFFFFFF);
+  ck_assert_int_eq(result, 0);
+
+  src.bits[0] = 0xFFFFFFFF;
+  src.bits[1] = 0xFFFFFFFF;
+  src.bits[2] = 0xFFFFFFFF;
+  src.bits[3] = 0x0;
+  result = s21_from_decimal_to_float(src, &number);
+  ck_assert_float_eq(number, 79228162514264337593543950336.0);
+  ck_assert_int_eq(result, 0);
+
+  src.bits[0] = 0xFFFFFFFF;
+  src.bits[1] = 0xFFFFFFFF;
+  src.bits[2] = 0xFFFFFFFF;
+  src.bits[3] = 0x0;
+  s21_setsign(&src, 1);
+  result = s21_from_decimal_to_float(src, &number);
+  ck_assert_float_eq(number, -79228162514264337593543950336.0);
+  ck_assert_int_eq(result, 0);
+
+  src.bits[0] = 0x1;
+  src.bits[1] = 0x0;
+  src.bits[2] = 0x0;
+  src.bits[3] = 0x0;
+  s21_set_scale(&src, 28);
+  result = s21_from_decimal_to_float(src, &number);
+  ck_assert_float_eq_tol(number, 1e-28, 1e-6);
+  // printf("%f\n", number);
+  ck_assert_int_eq(result, 0);
+
+  src.bits[0] = 0x1;
+  src.bits[1] = 0x0;
+  src.bits[2] = 0x0;
+  src.bits[3] = 0x0;
+  s21_set_scale(&src, 28);
+  s21_setsign(&src, 1);
+  result = s21_from_decimal_to_float(src, &number);
+  ck_assert_float_eq_tol(number, -1e-28, 1e-6);
+  // printf("%f\n", number);
+  ck_assert_int_eq(result, 0);
 }
 END_TEST
 
@@ -2655,6 +2775,12 @@ int main(void) {
   tcase_add_test(tc1_1, from_float_to_decimal7);
   tcase_add_test(tc1_1, from_float_to_decimal8);
   tcase_add_test(tc1_1, from_float_to_decimal9);
+
+  tcase_add_test(tc1_1, decimal_to_float1);
+  tcase_add_test(tc1_1, decimal_to_float2);
+  tcase_add_test(tc1_1, decimal_to_float3);
+  tcase_add_test(tc1_1, decimal_to_float4);
+  tcase_add_test(tc1_1, decimal_to_float5);
 
   tcase_add_test(tc1_1, add1);
   tcase_add_test(tc1_1, add2);
