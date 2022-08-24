@@ -1,9 +1,6 @@
 /*
 to do:
 - операторы сравнения - переделать возвращаемое значение
-- функции преобразования в/из int, float - проверить на nan, inf, inf, max, min,
-возвращаемое значение функции
-
 
 ?- другие функции расширить тест-кейсы
 ?- cppcheck --enable=all --bug-hunting - задачка со * поустранять warnings
@@ -368,7 +365,8 @@ START_TEST(decimal_to_int4) {
   src.bits[0] = 123451234;
   src.bits[1] = 0;
   src.bits[2] = 0;
-  src.bits[3] = 2147483648;
+  // src.bits[3] = 2147483648;
+  s21_setsign(&src, 1);
   result = s21_from_decimal_to_int(src, &number);
   ck_assert_int_eq(number, -123451234);
   ck_assert_int_eq(result, 0);
@@ -384,6 +382,29 @@ START_TEST(decimal_to_int5) {
   src.bits[3] = 2147483648;
   result = s21_from_decimal_to_int(src, &number);
   ck_assert_int_eq(number, -18);
+  ck_assert_int_eq(result, 0);
+
+  // s21_from_float_to_decimal(2147483647.2147483647, &src);
+  // result = s21_from_decimal_to_int(src, &number);
+  // ck_assert_int_eq(number, 2147483647);
+  // ck_assert_int_eq(result, 0);
+
+  src.bits[0] = -9;
+  src.bits[1] = 0;
+  src.bits[2] = 0;
+  src.bits[3] = 0;
+  s21_set_scale(&src, 1);
+  result = s21_from_decimal_to_int(src, &number);
+  ck_assert_int_eq(number, 0);
+  ck_assert_int_eq(result, 0);
+
+  src.bits[0] = 2147483647;
+  src.bits[1] = 1;
+  src.bits[2] = 0;
+  src.bits[3] = 0;
+  s21_set_scale(&src, 1);
+  result = s21_from_decimal_to_int(src, &number);
+  ck_assert_int_eq(number, 2147483647);
   ck_assert_int_eq(result, 0);
 }
 END_TEST
