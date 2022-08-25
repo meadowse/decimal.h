@@ -267,8 +267,8 @@ s21_decimal s21_sub(s21_decimal number_1, s21_decimal number_2) {
       s21_setsign(&number_2, 0);
       res = s21_add(number_1, number_2);
       s21_setsign(&res, sign);
-    } else {                                   // signs equal
-      if (s21_is_equal(number_1, number_2)) {  // digits don't equals
+    } else {                                    // signs equal
+      if (!s21_is_equal(number_1, number_2)) {  // digits don't equals
         int sign1 = s21_getsign(&number_1);
         int sign2 = s21_getsign(&number_2);
         s21_setsign(&number_1, 0);
@@ -424,7 +424,7 @@ int s21_is_equal(s21_decimal value1, s21_decimal value2) {
 
   for (int i = 95; i >= 0 && is_equal == -1; i--)
     if (s21_get_bit(value1, i) != s21_get_bit(value2, i)) is_equal = 1;
-  return (is_equal != 1) ? 0 : 1;
+  return (is_equal != 1) ? 1 : 0;
 }
 
 int s21_is_not_equal(s21_decimal dec1, s21_decimal dec2) {
@@ -433,7 +433,7 @@ int s21_is_not_equal(s21_decimal dec1, s21_decimal dec2) {
 
 int s21_is_greater_or_equal(s21_decimal dec1, s21_decimal dec2) {
   return (s21_is_greater(dec1, dec2) &&
-          s21_is_equal(dec1, dec2));  // 0 - больше или равно, 1 - меньше
+          !s21_is_equal(dec1, dec2));  // 0 - больше или равно, 1 - меньше
 }
 
 void s21_copy_bits(s21_decimal source, s21_decimal *dest) {
@@ -580,7 +580,7 @@ s21_decimal check_for_mul(s21_decimal value1, s21_decimal value2) {
   int there_is_neg_inf = s21_are_neg_inf(&value1, &value2) != 0 ? 1 : 0;
   int there_is_inf = s21_are_inf(&value1, &value2) != 0 ? 1 : 0;
   int there_is_zero =
-      s21_is_equal(value1, zero) == 0 || s21_is_equal(value2, zero) == 0 ? 1
+      s21_is_equal(value1, zero) == 1 || s21_is_equal(value2, zero) == 1 ? 1
                                                                          : 0;
 
   int there_is_plus_normal =
@@ -736,16 +736,16 @@ s21_decimal s21_div(s21_decimal divident, s21_decimal divisor) {
     //  if (is_NAN(&divident, &divisor) == 0) {
     result.value_type = s21_nan;
   // }
-  else if (s21_is_equal(divisor, zero) == 0 &&
+  else if (s21_is_equal(divisor, zero) == 1 &&
            s21_is_less(divident, zero) == 0) {
     //    -x/0
     result.value_type = s21_neg_infinity;
-  } else if (s21_is_equal(divisor, zero) == 0 &&
+  } else if (s21_is_equal(divisor, zero) == 1 &&
              s21_is_greater(divident, zero) == 0) {
     //   +x/0
     result.value_type = s21_infinity;
-  } else if (s21_is_equal(divisor, zero) == 0 &&
-             s21_is_equal(divident, zero) == 0) {
+  } else if (s21_is_equal(divisor, zero) == 1 &&
+             s21_is_equal(divident, zero) == 1) {
     //    0/0
     result.value_type = s21_nan;
   } else if ((divident.value_type == s21_infinity ||
@@ -800,7 +800,7 @@ s21_decimal s21_div(s21_decimal divident, s21_decimal divisor) {
     // делим, пока не достигнем максимальной точности или пока не поделим без
     // остатка
 
-    for (; inside_scale <= 27 && s21_is_equal(remainder, zero) == 1;) {
+    for (; inside_scale <= 27 && s21_is_equal(remainder, zero) == 0;) {
       if (s21_is_less(result, border_value) == 1) {
         break;
       }
@@ -908,7 +908,7 @@ int s21_floor(s21_decimal value, s21_decimal *res) {
     for (int i = scale; i > 0; i--) value = s21_div_bits(value, ten, &tmp);
     s21_set_scale(&value, 0);
 
-    if (!s21_is_equal(value, dec1_copy)) type = 0;
+    if (s21_is_equal(value, dec1_copy)) type = 0;
     if (sign && type) {
       value = s21_add(value, one);
       s21_setsign(&value, 1);
