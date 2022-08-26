@@ -275,7 +275,7 @@ s21_decimal s21_sub(s21_decimal number_1, s21_decimal number_2) {
         s21_setsign(&number_2, 0);
         s21_decimal *smallPtr, *bigPtr;
 
-        if (!s21_is_less(number_1, number_2)) {
+        if (s21_is_less(number_1, number_2)) {
           smallPtr = &number_1;
           bigPtr = &number_2;
           sign = !sign2;
@@ -383,7 +383,7 @@ int s21_is_greater(s21_decimal value1, s21_decimal value2) {
   }
   if ((is_greater != -1) && (s21_getsign(&value1) && s21_getsign(&value2)))
     is_greater = !is_greater;
-  return is_greater;  // 0 - больше, 1 - меньше
+  return !is_greater;  // 0 - больше, 1 - меньше
 }
 
 int s21_is_less(s21_decimal dec1, s21_decimal dec2) {
@@ -395,9 +395,9 @@ int s21_is_less_or_equal(s21_decimal dec1, s21_decimal dec2) {
   if (dec1.value_type == s21_nan || dec2.value_type == s21_nan) {
     ret = 1;
   } else {
-    ret = !(s21_is_greater(dec1, dec2));
+    ret = (s21_is_greater(dec1, dec2));
   }
-  return ret;
+  return !ret;
 }
 
 int s21_is_equal(s21_decimal value1, s21_decimal value2) {
@@ -432,8 +432,8 @@ int s21_is_not_equal(s21_decimal dec1, s21_decimal dec2) {
 }
 
 int s21_is_greater_or_equal(s21_decimal dec1, s21_decimal dec2) {
-  return (s21_is_greater(dec1, dec2) &&
-          !s21_is_equal(dec1, dec2));  // 0 - больше или равно, 1 - меньше
+  return (s21_is_greater(dec1, dec2) ||
+          s21_is_equal(dec1, dec2));  // 1 - больше или равно, 0 - меньше
 }
 
 void s21_copy_bits(s21_decimal source, s21_decimal *dest) {
@@ -471,8 +471,8 @@ int s21_from_decimal_to_int(s21_decimal source, int *dst) {
               one = {{1, 0, 0, 0}, 0}, source2;
   i_min = s21_add(i_max, one);
   s21_setsign(&i_min, 1);
-  if ((source.value_type == 0) && (s21_is_greater(source, i_max)) &&
-      (s21_is_less(source, i_min))) {
+  if ((source.value_type == 0) && (!s21_is_greater(source, i_max)) &&
+      (!s21_is_less(source, i_min))) {
     s21_truncate(source, &source2);
     *dst = source2.bits[0];
 
@@ -555,7 +555,7 @@ s21_decimal s21_div_bits(s21_decimal a, s21_decimal b, s21_decimal *rem) {
   s21_decimal res = {{0, 0, 0, 0}, 0};
   for (int i = s21_last_bit(a); i >= 0; i--) {
     if (s21_get_bit(a, i)) s21_set_bit(rem, 0, 1);
-    if (!s21_is_greater_or_equal(*rem, b)) {
+    if (s21_is_greater_or_equal(*rem, b)) {
       *rem = s21_sub(*rem, b);
       if (i != 0) s21_shift_left(rem, 1);
       if (s21_get_bit(a, i - 1)) s21_set_bit(rem, 0, 1);
@@ -584,15 +584,15 @@ s21_decimal check_for_mul(s21_decimal value1, s21_decimal value2) {
                                                                          : 0;
 
   int there_is_plus_normal =
-      (s21_is_greater(value1, zero) == 0 && value1.value_type == s21_usual) ||
-              (s21_is_greater(value2, zero) == 0 &&
+      (s21_is_greater(value1, zero) == 1 && value1.value_type == s21_usual) ||
+              (s21_is_greater(value2, zero) == 1 &&
                value2.value_type == s21_usual)
           ? 1
           : 0;
 
   int there_is_neg_normal =
-      (s21_is_less(value1, zero) == 0 && value1.value_type == s21_usual) ||
-              (s21_is_less(value2, zero) == 0 && value2.value_type == s21_usual)
+      (s21_is_less(value1, zero) == 1 && value1.value_type == s21_usual) ||
+              (s21_is_less(value2, zero) == 1 && value2.value_type == s21_usual)
           ? 1
           : 0;
 
@@ -721,11 +721,11 @@ s21_decimal s21_div(s21_decimal divident, s21_decimal divisor) {
 
   s21_decimal zero = {{0, 0, 0, 0}, s21_usual};
   int divsr_is_normal_plus =
-      s21_is_greater(divisor, zero) == 0 && divisor.value_type == s21_usual ? 1
+      s21_is_greater(divisor, zero) == 1 && divisor.value_type == s21_usual ? 1
                                                                             : 0;
 
   int divsr_is_normal_minus =
-      s21_is_less(divisor, zero) == 0 && divisor.value_type == s21_usual ? 1
+      s21_is_less(divisor, zero) == 1 && divisor.value_type == s21_usual ? 1
                                                                          : 0;
 
   int flag = 1;  // для отлова ситуации с normal/+-inf
@@ -737,11 +737,11 @@ s21_decimal s21_div(s21_decimal divident, s21_decimal divisor) {
     result.value_type = s21_nan;
   // }
   else if (s21_is_equal(divisor, zero) == 1 &&
-           s21_is_less(divident, zero) == 0) {
+           s21_is_less(divident, zero) == 1) {
     //    -x/0
     result.value_type = s21_neg_infinity;
   } else if (s21_is_equal(divisor, zero) == 1 &&
-             s21_is_greater(divident, zero) == 0) {
+             s21_is_greater(divident, zero) == 1) {
     //   +x/0
     result.value_type = s21_infinity;
   } else if (s21_is_equal(divisor, zero) == 1 &&
@@ -801,7 +801,7 @@ s21_decimal s21_div(s21_decimal divident, s21_decimal divisor) {
     // остатка
 
     for (; inside_scale <= 27 && s21_is_equal(remainder, zero) == 0;) {
-      if (s21_is_less(result, border_value) == 1) {
+      if (s21_is_less(result, border_value) == 0) {
         break;
       }
       remainder = s21_mul(remainder, ten);
@@ -830,12 +830,13 @@ s21_decimal s21_div(s21_decimal divident, s21_decimal divisor) {
   return result;
 }
 
-s21_decimal s21_mod(s21_decimal a, s21_decimal b) {
-  s21_decimal res;
+int s21_mod(s21_decimal a, s21_decimal b, s21_decimal *res) {
+  // s21_decimal res;
   s21_decimal tmp;
+  int ret = 0;
 
   if (b.value_type == s21_nan) {
-    res.value_type = s21_nan;
+    res->value_type = s21_nan;
   } else {
     // int i;
     s21_set0bitstype(&tmp);  //  на всякий случай?
@@ -851,9 +852,9 @@ s21_decimal s21_mod(s21_decimal a, s21_decimal b) {
     // s21_from_decimal_to_int(tmp, &i);
     // printf("%d\n", i);
 
-    res = s21_sub(a, tmp);
+    *res = s21_sub(a, tmp);
   }
-  return res;
+  return ret;
 }
 
 int s21_truncate(s21_decimal value, s21_decimal *res) {
@@ -887,7 +888,7 @@ int s21_round(s21_decimal value, s21_decimal *res) {
 
   if (!value.value_type) {
     *res = whole;
-    if (!s21_is_greater_or_equal(rem, five)) *res = s21_add(*res, one);
+    if (s21_is_greater_or_equal(rem, five)) *res = s21_add(*res, one);
     s21_setsign(res, sign);
   } else {
     res->value_type = value.value_type;
