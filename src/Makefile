@@ -1,49 +1,53 @@
-CC=gcc -std=c11 -D_GNU_SOURCE
-CFLAGS=-Wall -Wextra -Werror
-GCOV_LIBS=--coverage
-BUILD_PATH=./
-SOURCES=s21_decimal.c
-H=s21_decimal.h
-LIBO=s21_decimal.o
-LIBA=s21_decimal.a
-EXE=test.out
+CC=gcc
+CFLAGS=-Wall -Wextra -Werror -std=c11
+LIBS=-lcheck
+LFLAGS=-fprofile-arcs -ftest-coverage
 
-ifeq ($(OS), Darwin)
-	TST_LIBS := -lcheck -lm
-	LEAKS := leaks -atExit --  
-else
-	TST_LIBS := -lcheck -lsubunit -lrt -lm -lpthread -g
-	LEAKS := valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --trace-children=yes --track-fds=yes  --log-file=valgrind.log
-endif
+all: clean s21_decimal.a test
 
-all: s21_decimal.a test gcov_report
+s21_decimal.a: s21_decimal.o
+	ar rcs s21_decimal.a s21_decimal.o
+	cp s21_decimal.a libs21_decimal.a
+	cp s21_decimal.a ls21_decimal.a
+	ranlib libs21_decimal.a
+	ranlib ls21_decimal.a
 
-clean:
-	@rm -rf *.a && rm -rf *.o && rm -rf *.cfg
-	@rm -rf *.info && rm -rf *.gcda && rm -rf *.gcno &&  rm -rf *.gcov
-	@rm -rf report/ && rm -rf *.out && rm -rf *.log
+s21_decimal.o: s21_decimal.c
+	$(CC) $(CFLAGS) -c s21_decimal.c -o s21_decimal.o
 
 test: s21_decimal.a
-	@$(CC) $(CFLAGS) test.c -L. $(LIBA) $(TST_LIBS) -o $(BUILD_PATH)$(EXE)
-	@$(BUILD_PATH)$(EXE)
+	$(CC) $(CFLAGS) test.c s21_decimal.a -o test.out $(LIBS)
+	./test.out
+
+gcov_report: s21_decimal.a
+	$(CC) $(CFLAGS) $(LFLAGS) test.c s21_decimal.a -o test.out $(LIBS)
+	./test.out
+	lcov -t "test" -o test.info -c -d .
+	genhtml -o report test.info
+
+open:
+	open report/index.html
 
 rebuild: clean all
 
-s21_decimal.a: clean
-	@$(CC) $(CFLAGS) -c $(SOURCES) -o $(BUILD_PATH)$(LIBO)
-	@ar rcs $(LIBA) $(LIBO)
-	@ranlib $(LIBA)
-
-gcov_report: s21_decimal.a
-	@$(CC) $(CFLAGS) $(GCOV_LIBS) test.c $(SOURCES) $(LIBA) -L. $(LIBA) $(TST_LIBS) -o $(BUILD_PATH)$(EXE)
-	@$(BUILD_PATH)$(EXE)
-	@lcov -t "test" -c -d $(BUILD_PATH) --output-file $(BUILD_PATH)coverage.info
-	@genhtml $(BUILD_PATH)coverage.info --output-directory $(BUILD_PATH)report/
-	# open report/index.html
-
 check:
-	@$(LEAKS) ./test.out
-	@ #cppcheck --enable=all --bug-hunting --std=c11 --suppress=missingIncludeSystem *.h *.c 
-	@cppcheck --enable=all --std=c11 --suppress=missingIncludeSystem *.h *.c
-	@cp ../materials/linters/CPPLINT.cfg .
-	@python3 ../materials/linters/cpplint.py --extension=c *.c *.h
+	cppcheck --enable=all --suppress=missingIncludeSystem *.c *.h
+	python3 ../materials/linters/cpplint.py --extensions=c *.c *.h
+	make test
+	CK_FORK=no leaks --atExit -- ./test.out
+	make clean
+
+clean:
+	rm -rf *.gc* *.o *.a *.out *.info test.out
+	rm -rf report
+
+install_brew:
+	cd ~
+	curl -fsSL https://rawgit.com/kube/42homebrew/master/install.sh | zsh
+	brew install lcov
+
+install_valgrind:
+	brew install --HEAD LouisBrunner/valgrind/valgrind
+
+install_cpch:
+	brew install cppcheck
