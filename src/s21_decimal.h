@@ -3,7 +3,7 @@
 
 #include <limits.h>
 #include <math.h>
-#include <stdio.h>  // remove
+#include <stdio.h>
 #include <string.h>
 
 typedef enum {
@@ -24,10 +24,10 @@ typedef union {
   float fl;
 } int_float;
 
-s21_decimal s21_add(s21_decimal, s21_decimal);
-s21_decimal s21_sub(s21_decimal, s21_decimal);
-s21_decimal s21_mul(s21_decimal, s21_decimal);
-s21_decimal s21_div(s21_decimal, s21_decimal);
+int s21_add(s21_decimal, s21_decimal, s21_decimal *);
+int s21_sub(s21_decimal, s21_decimal, s21_decimal *);
+int s21_mul(s21_decimal, s21_decimal, s21_decimal *);
+int s21_div(s21_decimal, s21_decimal, s21_decimal *);
 int s21_mod(s21_decimal, s21_decimal, s21_decimal *);
 
 int s21_floor(s21_decimal, s21_decimal *);

@@ -37,12 +37,13 @@ s21_decimal.a: clean
 gcov_report: s21_decimal.a
 	@$(CC) $(CFLAGS) $(GCOV_LIBS) test.c $(SOURCES) $(LIBA) -L. $(LIBA) $(TST_LIBS) -o $(BUILD_PATH)$(EXE)
 	@$(BUILD_PATH)$(EXE)
-	lcov -t "test" -c -d $(BUILD_PATH) --output-file $(BUILD_PATH)coverage.info
-	genhtml $(BUILD_PATH)coverage.info --output-directory $(BUILD_PATH)report/
+	@lcov -t "test" -c -d $(BUILD_PATH) --output-file $(BUILD_PATH)coverage.info
+	@genhtml $(BUILD_PATH)coverage.info --output-directory $(BUILD_PATH)report/
+	# open report/index.html
 
 check:
 	@$(LEAKS) ./test.out
-	# cppcheck --enable=all --bug-hunting --std=c11 --suppress=missingIncludeSystem *.h *.c 
+	@ #cppcheck --enable=all --bug-hunting --std=c11 --suppress=missingIncludeSystem *.h *.c 
 	@cppcheck --enable=all --std=c11 --suppress=missingIncludeSystem *.h *.c
 	@cp ../materials/linters/CPPLINT.cfg .
 	@python3 ../materials/linters/cpplint.py --extension=c *.c *.h
