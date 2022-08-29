@@ -4,6 +4,7 @@ SOURCES=s21_decimal.c
 OBJECTS=$(SOURCES:.c=.o)
 OS = $(shell uname)
 TEST_FILE_NAME = test.c
+TEST_FILE_NAME2 = test2.c
 
 ifeq ($(OS), Darwin)
 	TEST_LIBS=-lcheck
@@ -19,6 +20,10 @@ s21_decimal.a: clean $(OBJECTS)
 
 test: $(TEST_FILE_NAME) s21_decimal.a
 	$(CC) $(CFLAGS) $(TEST_FILE_NAME) $(SOURCES) -o test $(TEST_LIBS) -L. --coverage
+	./test
+
+test2: $(TEST_FILE_NAME2) s21_decimal.a
+	$(CC) $(CFLAGS) $(TEST_FILE_NAME2) $(SOURCES) -o test $(TEST_LIBS) -L. --coverage
 	./test
 
 gcov_report: test
