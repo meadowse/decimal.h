@@ -79,7 +79,8 @@ void to_addcode(s21_decimal *value) {
   value->bits[1] = res.bits[1];
   value->bits[2] = res.bits[2];
 
-  value->value_type = s21_ADDCODE;
+  // value->value_type = s21_ADDCODE;
+  s21_set_bit(value, 126, 1);  // ref
 }
 
 void s21_level_scale(s21_decimal *value1, s21_decimal *value2) {
@@ -150,12 +151,18 @@ s21_decimal s21_add_bits(s21_decimal *value1, s21_decimal *value2) {
           buffer = 1;
         }
       }
-      // TODO(alex): s21_ADDCODE.
-      if (i == 95 && buffer == 1 && value1->value_type != s21_ADDCODE &&
-          value2->value_type != s21_ADDCODE)
+
+      // if (i == 95 && buffer == 1 && value1->value_type != s21_ADDCODE &&
+      //     value2->value_type != s21_ADDCODE)
+      //   res.value_type = s21_infinity;
+      // else
+      //   res.value_type = s21_usual;
+
+      if (i == 95 && buffer == 1 && s21_get_bit(*value1, 126) != 1 &&
+          s21_get_bit(*value2, 126) != 1)
         res.value_type = s21_infinity;
       else
-        res.value_type = s21_usual;
+        res.value_type = s21_usual;  // ref
     }
   }
 
@@ -178,7 +185,8 @@ int s21_add(s21_decimal value1, s21_decimal value2, s21_decimal *res) {
   int ret = 0;
   *res = s21_check_boundary(value1, value2);
 
-  if (res->value_type == s21_usual || res->value_type == s21_ADDCODE) {
+  // if (res->value_type == s21_usual || res->value_type == s21_ADDCODE ) {
+  if (res->value_type == s21_usual || s21_get_bit(*res, 126)) {
     if (!s21_getsign(&value1) && !s21_getsign(&value2)) {  // positive
       if (s21_get_scale(&value1) != s21_get_scale(&value2))
         s21_level_scale(&value1, &value2);
@@ -211,9 +219,10 @@ int s21_add(s21_decimal value1, s21_decimal value2, s21_decimal *res) {
 
       } else {
         *res = tmp;
+        int tmp_add = s21_get_bit(*res, 126);
         res->bits[3] = value1.bits[3];
+        s21_set_bit(res, 126, tmp_add);
       }
-
     } else if (s21_getsign(&value1) &&
                !s21_getsign(&value2)) {  // 1 - negative, 2 - positive
       s21_setsign(&value1, 0);
@@ -222,7 +231,6 @@ int s21_add(s21_decimal value1, s21_decimal value2, s21_decimal *res) {
                s21_getsign(&value2)) {  // 2 - negative, 1 - positive
       s21_setsign(&value2, 0);
       s21_sub(value1, value2, res);
-
     } else {  // both negative
       s21_setsign(&value1, 0);
       s21_setsign(&value2, 0);
@@ -235,7 +243,8 @@ int s21_add(s21_decimal value1, s21_decimal value2, s21_decimal *res) {
     }
   }
 
-  if (res->value_type == s21_ADDCODE) res->value_type = s21_usual;
+  // if (res->value_type == s21_ADDCODE) res->value_type = s21_usual;
+  if (s21_get_bit(*res, 126) == 1) res->value_type = s21_usual;  // ref
   if (res->value_type == s21_infinity) ret = 1;
   if (res->value_type == s21_neg_infinity) ret = 2;
 
