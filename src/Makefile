@@ -32,16 +32,18 @@ gcov_report: test
 
 clean:
 	rm -rf *.o *.a *.so *.gcda *.gcno *.gch rep.info *.html *.css test report *.txt test.info test.dSYM
+	clang-format -i *.c *.h
 
 install lcov:
 	curl -fsSL https://rawgit.com/kube/42homebrew/master/install.sh | zsh
 	brew install lcov
 
 check: test
-	cppcheck --enable=all --suppress=missingIncludeSystem --inconclusive --check-config *.c *.h
-	cp ../materials/linters/CPPLINT.cfg .
-	python3 ../materials/linters/cpplint.py --extension=c *.c *.h
-	rm -rf CPPLINT.cfg
+#	cppcheck --enable=all --suppress=missingIncludeSystem --inconclusive --check-config *.c *.h
+#	cp ../materials/linters/CPPLINT.cfg .
+#	python3 ../materials/linters/cpplint.py --extension=c *.c *.h
+#	rm -rf CPPLINT.cfg
+	clang-format -n *.c *.h
 	make test
 
 # style: test

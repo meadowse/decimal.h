@@ -7,21 +7,21 @@
 #include <string.h>
 
 typedef enum {
-  s21_usual = 0,
-  s21_infinity = 1,
-  s21_neg_infinity = 2,
-  s21_nan = 3  //,
-  // s21_ADDCODE = 4
+    s21_usual = 0,
+    s21_infinity = 1,
+    s21_neg_infinity = 2,
+    s21_nan = 3  //,
+                 // s21_ADDCODE = 4
 } s21_value_type;
 
 typedef struct {
-  int bits[4];
-  s21_value_type value_type;
+    int bits[4];
+    s21_value_type value_type;
 } s21_decimal;
 
 typedef union {
-  int in;
-  float fl;
+    int in;
+    float fl;
 } int_float;
 
 int s21_add(s21_decimal, s21_decimal, s21_decimal *);
