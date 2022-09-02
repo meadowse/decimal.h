@@ -9,9 +9,9 @@
 typedef enum {
     s21_usual = 0,
     s21_infinity = 1,
-    s21_neg_infinity = 2,
-    s21_nan = 3  //,
-                 // s21_ADDCODE = 4
+    s21_neg_infinity = 2  //,
+                          // s21_nan = 3  //,
+                          // s21_ADDCODE = 4
 } s21_value_type;
 
 typedef struct {
@@ -68,6 +68,9 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst);
 int getFloatExp(float *src);
 int s21_are_zero(s21_decimal, s21_decimal);
 int s21_are_inf(s21_decimal *, s21_decimal *);
+int s21_check_inf(s21_decimal);
+void s21_set_inf(s21_decimal *);
+int s21_are_inf_new(s21_decimal *, s21_decimal *);
 int s21_are_neg_inf(s21_decimal *, s21_decimal *);
 int s21_are_neg(s21_decimal *, s21_decimal *);
 void s21_check_scale(s21_decimal *, s21_decimal *);
