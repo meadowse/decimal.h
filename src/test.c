@@ -2962,9 +2962,14 @@ START_TEST(negate3) {
     float f_result = 0;
     s21_decimal source, result;
     s21_from_float_to_decimal(-123.456e7, &source);
+    // s21_print(source);
+    printf("%d %d\n", s21_check_inf(source), s21_get_scale(&source));
     s21_negate(source, &result);
+    // s21_print(result);
     s21_from_decimal_to_float(result, &f_result);
-    ck_assert_float_eq(123.456e7, f_result);
+    // s21_print(result);
+    // ck_assert_float_eq(123.456e7, f_result);
+    ck_assert_float_eq_tol(123.456e7, f_result, 1e-6);
 }
 END_TEST
 START_TEST(negate4) {
@@ -2982,7 +2987,8 @@ START_TEST(negate5) {
     s21_from_float_to_decimal(1.0 / 0.0, &source);
     s21_negate(source, &result);
     s21_from_decimal_to_float(result, &f_result);
-    ck_assert_float_eq(s21_neg_infinity, result.value_type);
+    ck_assert_int_eq(1, s21_check_inf(result));
+    ck_assert_int_eq(1, s21_getsign(&result));
     ck_assert_float_eq(f_result, -1.0 / 0.0);
     ck_assert_float_infinite(f_result);
 }
@@ -2991,9 +2997,19 @@ START_TEST(negate6) {
     float f_result = 0;
     s21_decimal source, result;
     s21_from_float_to_decimal(-1.0 / 0.0, &source);
+    // s21_print(source);
     s21_negate(source, &result);
+    // s21_print(result);
+    // printf("%d %d %d %d %d\n", s21_check_inf(result), s21_get_scale(&result),
+    // result.bits[0], result.bits[1],
+    //        result.bits[2]);
+    // if ((s21_get_scale(&result) == 28) && (result.bits[0] == 0) &&
+    // (result.bits[1] == 0) &&
+    //     (result.bits[2] == 0))
+    //     printf("111\n");
+
     s21_from_decimal_to_float(result, &f_result);
-    ck_assert_float_eq(s21_infinity, result.value_type);
+    ck_assert_int_eq(1, s21_check_inf(result));
     ck_assert_float_eq(f_result, 1.0 / 0.0);
     ck_assert_float_infinite(f_result);
 }
