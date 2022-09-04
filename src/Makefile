@@ -39,7 +39,7 @@ install lcov:
 	brew install lcov
 
 check: test
-#	cppcheck --enable=all --suppress=missingIncludeSystem --inconclusive --check-config *.c *.h
+	cppcheck --enable=all --suppress=missingIncludeSystem --inconclusive --check-config *.c *.h
 #	cp ../materials/linters/CPPLINT.cfg .
 #	python3 ../materials/linters/cpplint.py --extension=c *.c *.h
 #	rm -rf CPPLINT.cfg

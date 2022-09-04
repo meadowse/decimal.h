@@ -16,7 +16,7 @@
 
 typedef struct {
     int bits[4];
-    s21_value_type value_type;
+    // s21_value_type value_type;
 } s21_decimal;
 
 typedef union {

@@ -8,19 +8,19 @@
 #define neg_inf -1.0 / 0.0
 
 START_TEST(s21_add_test) {
-    s21_decimal case_full1 = {{123, 321, -2147483648, 0}, 0};
-    s21_decimal case_full2 = {{123, 321, -2147483648, 0}, 0};
-    s21_decimal result1 = {{0, 0, 0, 0}, 0};
-    s21_decimal result2 = {{0, 0, 0, 0}, 0};
-    s21_decimal case_max = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}, 0};
-    s21_decimal case_min = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x80000000}, 0};
-    s21_decimal case1 = {{0, 0, 0, 0}, 0};
-    s21_decimal case2 = {{1, 0, 0, 0}, 0};
+    s21_decimal case_full1 = {{123, 321, -2147483648, 0}};
+    s21_decimal case_full2 = {{123, 321, -2147483648, 0}};
+    s21_decimal result1 = {{0, 0, 0, 0}};
+    s21_decimal result2 = {{0, 0, 0, 0}};
+    s21_decimal case_max = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    s21_decimal case_min = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x80000000}};
+    s21_decimal case1 = {{0, 0, 0, 0}};
+    s21_decimal case2 = {{1, 0, 0, 0}};
     int result_full1 = 0;
     result_full1 = s21_add(case_full1, case_full2, &result1);
     ck_assert_int_eq(result_full1, 1);
     setBits(&case_full1, 127);
-    s21_decimal case_full = {{123, 321, 0xFFFFFFFF, 0}, 0};
+    s21_decimal case_full = {{123, 321, 0xFFFFFFFF, 0}};
     result_full1 = s21_add(case_full, case_full, &result2);
     ck_assert_int_eq(result_full1, 1);
     s21_add(case_max, case_min, &result1);
@@ -32,7 +32,7 @@ START_TEST(s21_add_test) {
     s21_add(case1, case2, &result2);
     s21_from_decimal_to_int(result2, &int_res);
     ck_assert_int_eq(int_res, 1);
-    s21_decimal one = {{1, 0, 0, 0}, 0};
+    s21_decimal one = {{1, 0, 0, 0}};
     s21_decimal result;
     result_full1 = s21_add(one, case_max, &result);
     ck_assert_int_eq(result_full1, 1);
@@ -40,18 +40,18 @@ START_TEST(s21_add_test) {
 END_TEST
 
 START_TEST(s21_sub_test) {
-    s21_decimal result1 = {{0, 0, 0, 0}, 0};
-    s21_decimal result2 = {{0, 0, 0, 0}, 0};
-    s21_decimal case_full1 = {{123, 321, -2147483648, 0}, 0};
-    s21_decimal case_full2 = {{123, 321, -2147483648, 0}, 0};
-    s21_decimal case1 = {{0, 0, 0, 0}, 0};
-    s21_decimal case2 = {{1, 0, 0, 0}, 0};
-    s21_decimal case_max = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}, 0};
+    s21_decimal result1 = {{0, 0, 0, 0}};
+    s21_decimal result2 = {{0, 0, 0, 0}};
+    s21_decimal case_full1 = {{123, 321, -2147483648, 0}};
+    s21_decimal case_full2 = {{123, 321, -2147483648, 0}};
+    s21_decimal case1 = {{0, 0, 0, 0}};
+    s21_decimal case2 = {{1, 0, 0, 0}};
+    s21_decimal case_max = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
 
     int int_res = -1;
     int res_full1 = 0;
     int res_full2 = 0;
-    s21_decimal case_full = {{123, 321, 0xFFFFFFFF, 0}, 0};
+    s21_decimal case_full = {{123, 321, 0xFFFFFFFF, 0}};
     res_full1 = s21_sub(case_full, case_full, &result1);
     ck_assert_int_eq(res_full1, 0);
     setBits(&case_full1, 127);
@@ -66,16 +66,16 @@ START_TEST(s21_sub_test) {
 END_TEST
 
 START_TEST(s21_mul_test) {
-    s21_decimal result1 = {{0, 0, 0, 0}, 0};
-    s21_decimal result2 = {{0, 0, 0, 0}, 0};
-    s21_decimal case_full1 = {{123, 321, -2147483648, 0}, 0};
-    s21_decimal case_full2 = {{123, 321, -2147483648, 0}, 0};
-    s21_decimal case_max = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}, 0};
+    s21_decimal result1 = {{0, 0, 0, 0}};
+    s21_decimal result2 = {{0, 0, 0, 0}};
+    s21_decimal case_full1 = {{123, 321, -2147483648, 0}};
+    s21_decimal case_full2 = {{123, 321, -2147483648, 0}};
+    s21_decimal case_max = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
     int res_mul = -1;
-    s21_decimal case_d = {{0, 0, 0, 0}, 0};
+    s21_decimal case_d = {{0, 0, 0, 0}};
     res_mul = s21_mul(case_d, case_max, &result1);
     ck_assert_int_eq(res_mul, 0);
-    s21_decimal max = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}, 0};
+    s21_decimal max = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
     res_mul = s21_mul(max, max, &result1);
     ck_assert_int_eq(res_mul, 1);
     int res_ful1 = 0;
@@ -89,14 +89,14 @@ START_TEST(s21_mul_test) {
 END_TEST
 
 START_TEST(s21_div_test) {
-    s21_decimal result1 = {{0, 0, 0, 0}, 0};
-    s21_decimal result2 = {{0, 0, 0, 0}, 0};
-    s21_decimal case_full1 = {{123, 321, -2147483648, 0}, 0};
-    s21_decimal case_full2 = {{123, 321, -2147483648, 0}, 0};
-    s21_decimal case1 = {{0, 0, 0, 0}, 0};
-    s21_decimal case_max = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}, 0};
-    s21_decimal case12 = {{150, 0, 0, 0x80000000}, 0};
-    s21_decimal case13 = {{2, 0, 0, 0x80000000}, 0};
+    s21_decimal result1 = {{0, 0, 0, 0}};
+    s21_decimal result2 = {{0, 0, 0, 0}};
+    s21_decimal case_full1 = {{123, 321, -2147483648, 0}};
+    s21_decimal case_full2 = {{123, 321, -2147483648, 0}};
+    s21_decimal case1 = {{0, 0, 0, 0}};
+    s21_decimal case_max = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    s21_decimal case12 = {{150, 0, 0, 0x80000000}};
+    s21_decimal case13 = {{2, 0, 0, 0x80000000}};
     int int_res = -1;
     int res_div = -1;
     int_res = s21_div(case1, case_max, &result1);
@@ -108,7 +108,7 @@ START_TEST(s21_div_test) {
     int res_ful2 = 0;
     res_ful1 = s21_div(case_full1, case_full2, &result1);
     ck_assert_int_eq(res_ful1, 0);
-    s21_decimal one = {{1, 0, 0, 0}, 0};
+    s21_decimal one = {{1, 0, 0, 0}};
     res_ful2 = s21_div(one, case_max, &result2);
     ck_assert_int_eq(res_ful2, 2);
     res_ful1 = s21_mod(one, one, &result1);
@@ -229,10 +229,10 @@ START_TEST(s21_mod_test) {
 END_TEST
 
 START_TEST(s21_is_less_test) {
-    s21_decimal test1 = {{0, 0, 0, 0}, 0};
-    s21_decimal test2 = {{1, 0, 0, 0}, 0};
-    s21_decimal test3 = {{4294967295, 4294967295, 4294967295, 2147483648}, 0};
-    s21_decimal test4 = {{4294967295, 4294967295, 4294967295, 0}, 0};
+    s21_decimal test1 = {{0, 0, 0, 0}};
+    s21_decimal test2 = {{1, 0, 0, 0}};
+    s21_decimal test3 = {{4294967295, 4294967295, 4294967295, 2147483648}};
+    s21_decimal test4 = {{4294967295, 4294967295, 4294967295, 0}};
 
     ck_assert_int_eq(s21_is_less(test1, test2), 1);
     ck_assert_int_eq(s21_is_less(test2, test2), 0);
@@ -240,8 +240,8 @@ START_TEST(s21_is_less_test) {
     ck_assert_int_eq(s21_is_less(test4, test3), 0);
     ck_assert_int_eq(s21_is_less(test4, test1), 0);
 
-    s21_decimal test8 = {{0, 0, 1, 0}, 0};
-    s21_decimal test9 = {{0, 0, 1, 0}, 0};
+    s21_decimal test8 = {{0, 0, 1, 0}};
+    s21_decimal test9 = {{0, 0, 1, 0}};
     setBits(&test8, 0);
     setBits(&test9, 2);
     ck_assert_int_eq(s21_is_less(test8, test9), 1);
@@ -249,10 +249,10 @@ START_TEST(s21_is_less_test) {
 END_TEST
 
 START_TEST(s21_is_less_or_equal_test) {
-    s21_decimal test1 = {{7, 0, 0, 0}, 0};
-    s21_decimal test2 = {{7, 0, 0, 0}, 0};
-    s21_decimal test3 = {{4294967295, 4294967295, 4294967295, 0}, 0};
-    s21_decimal test4 = {{4294967295, 4294967295, 4294967295, 0}, 0};
+    s21_decimal test1 = {{7, 0, 0, 0}};
+    s21_decimal test2 = {{7, 0, 0, 0}};
+    s21_decimal test3 = {{4294967295, 4294967295, 4294967295, 0}};
+    s21_decimal test4 = {{4294967295, 4294967295, 4294967295, 0}};
 
     ck_assert_int_eq(s21_is_less_or_equal(test1, test2), 1);
     setBits(&test1, 127);
@@ -266,8 +266,8 @@ START_TEST(s21_is_less_or_equal_test) {
     setBits(&test4, 127);
     ck_assert_int_eq(s21_is_less_or_equal(test4, test1), 1);
 
-    s21_decimal test8 = {{0, 0, 1, 0}, 0};
-    s21_decimal test9 = {{0, 0, 1, 0}, 0};
+    s21_decimal test8 = {{0, 0, 1, 0}};
+    s21_decimal test9 = {{0, 0, 1, 0}};
     ck_assert_int_eq(s21_is_less_or_equal(test8, test9), 1);
     setBits(&test8, 0);
     setBits(&test9, 0);
@@ -276,10 +276,10 @@ START_TEST(s21_is_less_or_equal_test) {
 END_TEST
 
 START_TEST(s21_is_greater_test) {
-    s21_decimal test1 = {{777, 0, 0, 0}, 0};
-    s21_decimal test2 = {{777, 0, 0, 0}, 0};
-    s21_decimal test3 = {{4294967295, 4294967295, 4294967295, 0}, 0};
-    s21_decimal test4 = {{4294967295, 4294967295, 4294967295, 0}, 0};
+    s21_decimal test1 = {{777, 0, 0, 0}};
+    s21_decimal test2 = {{777, 0, 0, 0}};
+    s21_decimal test3 = {{4294967295, 4294967295, 4294967295, 0}};
+    s21_decimal test4 = {{4294967295, 4294967295, 4294967295, 0}};
 
     ck_assert_int_eq(s21_is_greater(test1, test2), 0);
     setBits(&test3, 127);
@@ -291,8 +291,8 @@ START_TEST(s21_is_greater_test) {
     ck_assert_int_eq(s21_is_greater(test4, test3), 1);
     ck_assert_int_eq(s21_is_greater(test1, test4), 0);
 
-    s21_decimal test8 = {{0, 0, 1, 0}, 0};
-    s21_decimal test9 = {{0, 0, 1, 0}, 0};
+    s21_decimal test8 = {{0, 0, 1, 0}};
+    s21_decimal test9 = {{0, 0, 1, 0}};
     setBits(&test8, 0);
     setBits(&test9, 0);
     ck_assert_int_eq(s21_is_greater(test8, test9), 0);
@@ -300,10 +300,10 @@ START_TEST(s21_is_greater_test) {
 END_TEST
 
 START_TEST(s21_is_greater_or_equal_test) {
-    s21_decimal test1 = {{777, 777, 777, 0}, 0};
-    s21_decimal test2 = {{777, 777, 777, 0}, 0};
-    s21_decimal test3 = {{4294967295, 4294967295, 4294967295, 0}, 0};
-    s21_decimal test4 = {{4294967295, 4294967295, 4294967295, 0}, 0};
+    s21_decimal test1 = {{777, 777, 777, 0}};
+    s21_decimal test2 = {{777, 777, 777, 0}};
+    s21_decimal test3 = {{4294967295, 4294967295, 4294967295, 0}};
+    s21_decimal test4 = {{4294967295, 4294967295, 4294967295, 0}};
 
     ck_assert_int_eq(s21_is_greater_or_equal(test1, test2), 1);
     setBits(&test2, 0);
@@ -317,8 +317,8 @@ START_TEST(s21_is_greater_or_equal_test) {
     setBits(&test4, 127);
     ck_assert_int_eq(s21_is_greater_or_equal(test1, test3), 0);
 
-    s21_decimal test8 = {{0, 0, 1, 0}, 0};
-    s21_decimal test9 = {{0, 0, 1, 0}, 0};
+    s21_decimal test8 = {{0, 0, 1, 0}};
+    s21_decimal test9 = {{0, 0, 1, 0}};
     ck_assert_int_eq(s21_is_greater_or_equal(test8, test9), 1);
     setBits(&test8, 0);
     setBits(&test9, 0);
@@ -327,10 +327,10 @@ START_TEST(s21_is_greater_or_equal_test) {
 END_TEST
 
 START_TEST(s21_is_equal_test) {
-    s21_decimal test1 = {{777, 777, 777, 0}, 0};
-    s21_decimal test2 = {{777, 777, 777, 0}, 0};
-    s21_decimal test3 = {{4294967295, 4294967295, 4294967295, 0}, 0};
-    s21_decimal test4 = {{4294967295, 4294967295, 4294967295, 0}, 0};
+    s21_decimal test1 = {{777, 777, 777, 0}};
+    s21_decimal test2 = {{777, 777, 777, 0}};
+    s21_decimal test3 = {{4294967295, 4294967295, 4294967295, 0}};
+    s21_decimal test4 = {{4294967295, 4294967295, 4294967295, 0}};
 
     ck_assert_int_eq(s21_is_equal(test1, test2), 1);
     setBits(&test1, 0);
@@ -343,10 +343,10 @@ START_TEST(s21_is_equal_test) {
 END_TEST
 
 START_TEST(s21_is_not_equal_test) {
-    s21_decimal test1 = {{777, 777, 777, 0}, 0};
-    s21_decimal test2 = {{777, 777, 777, 0}, 0};
-    s21_decimal test3 = {{4294967295, 4294967295, 4294967295, 0}, 0};
-    s21_decimal test4 = {{4294967295, 4294967295, 4294967295, 0}, 0};
+    s21_decimal test1 = {{777, 777, 777, 0}};
+    s21_decimal test2 = {{777, 777, 777, 0}};
+    s21_decimal test3 = {{4294967295, 4294967295, 4294967295, 0}};
+    s21_decimal test4 = {{4294967295, 4294967295, 4294967295, 0}};
 
     ck_assert_int_eq(s21_is_not_equal(test1, test2), 0);
     setBits(&test4, 0);
@@ -475,7 +475,7 @@ START_TEST(s21_from_float_to_decimal_test) {
 END_TEST
 
 START_TEST(s21_from_decimal_to_int_test) {
-    s21_decimal dec, big_dec = {{23536, 37375, 5647, 0}, 0};
+    s21_decimal dec, big_dec = {{23536, 37375, 5647, 0}};
     int zero_i = 0, n1 = -1233456789, n2 = 98765321;
     int zero_res, res1, res2;
     int r1 = s21_from_int_to_decimal(zero_i, &dec);
@@ -607,9 +607,9 @@ START_TEST(s21_truncate_test) {
 END_TEST
 
 START_TEST(s21_negate_test) {
-    s21_decimal n1 = {{0, 0, 0, 0}, 0};
-    s21_decimal n2 = {{0, 0, 0, 0}, 0};
-    s21_decimal res = {{0, 0, 0, 0}, 0};
+    s21_decimal n1 = {{0, 0, 0, 0}};
+    s21_decimal n2 = {{0, 0, 0, 0}};
+    s21_decimal res = {{0, 0, 0, 0}};
     setBits(&n1, 127);
     s21_negate(n2, &res);
     ck_assert_int_eq(getBits(n1, 127), getBits(res, 127));
