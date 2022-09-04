@@ -6,13 +6,13 @@
 #include <stdio.h>
 #include <string.h>
 
-typedef enum {
-    s21_usual = 0,
-    s21_infinity = 1,
-    s21_neg_infinity = 2  //,
-                          // s21_nan = 3  //,
-                          // s21_ADDCODE = 4
-} s21_value_type;
+// typedef enum {
+//     s21_usual = 0  //,
+//                    // s21_infinity = 1,
+//                    // s21_neg_infinity = 2  //,
+//                    // s21_nan = 3  //,
+//                    // s21_ADDCODE = 4
+// } s21_value_type;
 
 typedef struct {
     int bits[4];

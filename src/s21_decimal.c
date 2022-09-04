@@ -90,14 +90,17 @@ void s21_level_scale(s21_decimal *value1, s21_decimal *value2) {
     }
 
     while (s21_get_scale(value1) != s21_get_scale(value2)) {
-        if (tmp.value_type == s21_usual) {
+        // if (tmp.value_type == s21_usual) {
+        if (!s21_check_inf(tmp)) {
             s21_decimal tmp1, tmp2;
             tmp1 = *smaller, tmp2 = *smaller;
 
             s21_shift_left(&tmp1, 1);
             s21_shift_left(&tmp2, 3);
             tmp = s21_add_bits(&tmp1, &tmp2);  // equals to multiplying by 10
-            if (tmp.value_type == s21_usual) {
+
+            // if (tmp.value_type == s21_usual) {
+            if (!s21_check_inf(tmp)) {
                 s21_copy_bits(tmp, smaller);
                 s21_set_scale(smaller, s21_get_scale(smaller) + 1);
             }
@@ -636,43 +639,68 @@ s21_decimal check_for_mul(s21_decimal value1, s21_decimal value2) {
     s21_decimal res = {{0, 0, 0, 0}, s21_usual};
 
     // проверки аргументов
-    s21_decimal zero = {{0, 0, 0, 0}, s21_usual};
+    // s21_decimal zero = {{0, 0, 0, 0}, s21_usual};
     //   int there_is_nan =
     //       ((value1.value_type == s21_nan || value2.value_type == s21_nan))
     //       ? 1 : 0;
-    int there_is_neg_inf = s21_getsign(&value1) || s21_getsign(&value2) ? 1 : 0;
+    // int there_is_neg_inf = s21_getsign(&value1) || s21_getsign(&value2) ? 1 :
+    // 0;
     //   int there_is_inf = s21_are_inf(&value1, &value2) != 0 ? 1 : 0;
-    int there_is_inf = s21_are_inf_new(&value1, &value2) != 0 ? 1 : 0;
+    // int there_is_inf = s21_are_inf_new(&value1, &value2) != 0 ? 1 : 0;
 
     // int there_is_zero = s21_is_equal(value1, zero) == 1 ||
     // s21_is_equal(value2, zero) == 1 ? 1 : 0;
 
-    int there_is_plus_normal = (s21_is_greater(value1, zero) == 1 && value1.value_type == s21_usual) ||
-                                       (s21_is_greater(value2, zero) == 1 && value2.value_type == s21_usual)
-                                   ? 1
-                                   : 0;
+    // int there_is_plus_normal = (s21_is_greater(value1, zero) == 1 &&
+    // value1.value_type == s21_usual) ||
+    //                                    (s21_is_greater(value2, zero) == 1 &&
+    //                                    value2.value_type == s21_usual)
+    //                                ? 1
+    //                                : 0;
+    // int there_is_plus_normal = (s21_is_greater(value1, zero) == 1 &&
+    // s21_check_inf(value1) == 0) ||
+    //                                    (s21_is_greater(value2, zero) == 1 &&
+    //                                    s21_check_inf(value2) == 0)
+    //                                ? 1
+    //                                : 0;
 
-    int there_is_neg_normal = (s21_is_less(value1, zero) == 1 && value1.value_type == s21_usual) ||
-                                      (s21_is_less(value2, zero) == 1 && value2.value_type == s21_usual)
-                                  ? 1
-                                  : 0;
+    //   int there_is_neg_normal =
+    //       (s21_is_less(value1, zero) == 1 && value1.value_type == s21_usual) ||
+    //               (s21_is_less(value2, zero) == 1 && value2.value_type ==
+    //               s21_usual)
+    //           ? 1
+    //           : 0;
+    // int there_is_neg_normal = (s21_is_less(value1, zero) == 1 &&
+    // s21_check_inf(value1) == 0) ||
+    //                                   (s21_is_less(value2, zero) == 1 &&
+    //                                   s21_check_inf(value2) == 0)
+    //                               ? 1
+    //                               : 0;
 
-    res.value_type = value1.value_type ? value1.value_type : value2.value_type;
+    //   res.value_type = value1.value_type ? value1.value_type :
+    //   value2.value_type;
+    if (s21_check_inf(value1) || s21_check_inf(value2)) {
+        s21_set_inf(&res);
+        s21_setsign(&res, s21_getsign(&value1) ^ s21_getsign(&value2));
+    }
 
     //   if (there_is_nan || (there_is_zero && there_is_inf) ||
     //       (there_is_zero && there_is_neg_inf)) {
     //     res.value_type = s21_nan;
     //   } else
 
-    if ((there_is_plus_normal && there_is_inf) || (there_is_neg_normal && there_is_neg_inf) ||
-        (s21_check_inf(value1) && s21_check_inf(value2))) {
-        s21_set_inf(&res);
+    // todo(alex): sort out
+    // if ((there_is_plus_normal && there_is_inf) || (there_is_neg_normal &&
+    // there_is_neg_inf) ||
+    //     (s21_check_inf(value1) && s21_check_inf(value2))) {
+    //     s21_set_inf(&res);
 
-    } else if ((there_is_neg_normal && there_is_inf) || (there_is_inf && there_is_neg_inf) ||
-               (there_is_plus_normal && there_is_neg_inf)) {
-        s21_set_inf(&res);
-        s21_setsign(&res, 1);
-    }
+    // } else if ((there_is_neg_normal && there_is_inf) || (there_is_inf &&
+    // there_is_neg_inf) ||
+    //            (there_is_plus_normal && there_is_neg_inf)) {
+    //     s21_set_inf(&res);
+    //     s21_setsign(&res, 1);
+    // }
 
     return res;
 }
@@ -681,7 +709,8 @@ int s21_mul(s21_decimal number_1, s21_decimal number_2, s21_decimal *res) {
     int ret = 0;
     *res = check_for_mul(number_1, number_2);
 
-    if (res->value_type == s21_usual) {
+    // if (res->value_type == s21_usual) {
+    if (s21_check_inf(*res) == 0) {
         int sign_result;
 
         if (s21_getsign(&number_1) != s21_getsign(&number_2)) {
@@ -708,8 +737,8 @@ int s21_mul(s21_decimal number_1, s21_decimal number_2, s21_decimal *res) {
         // то если позволяет скейл, привести в нужный диапазон
         // и попробовать умножить снова
 
-        while (res->value_type != s21_usual &&
-               (s21_get_scale(&number_1) > 0 || s21_get_scale(&number_2) > 0)) {
+        // while (res->value_type != s21_usual &&
+        while (s21_check_inf(*res) && (s21_get_scale(&number_1) > 0 || s21_get_scale(&number_2) > 0)) {
             // более точное число поделим на 10, если позволяет скейл
 
             s21_decimal *chosen_numberPtr, *other_numberPtr;
@@ -746,7 +775,8 @@ int s21_mul(s21_decimal number_1, s21_decimal number_2, s21_decimal *res) {
         s21_setsign(res, sign_result);
     }
 
-    if (res->value_type != s21_usual) s21_set0bits(res);
+    //   if (res->value_type != s21_usual) s21_set0bits(res);
+    // if (s21_check_inf(*res)) s21_set0bits(res);
     //   if (res->value_type == s21_neg_infinity) ret = 2;
     //   if (res->value_type == s21_infinity) ret = 1;
 
@@ -762,9 +792,13 @@ int s21_div(s21_decimal divident, s21_decimal divisor, s21_decimal *result) {
     s21_set0bitstype(result);
 
     s21_decimal zero = {{0, 0, 0, 0}, s21_usual};
-    int divsr_is_normal_plus = s21_is_greater(divisor, zero) == 1 && divisor.value_type == s21_usual ? 1 : 0;
+    // int divsr_is_normal_plus = s21_is_greater(divisor, zero) == 1 &&
+    // divisor.value_type == s21_usual ? 1 : 0;
+    int divsr_is_normal_plus = s21_is_greater(divisor, zero) == 1 && !s21_check_inf(divisor) ? 1 : 0;
 
-    int divsr_is_normal_minus = s21_is_less(divisor, zero) == 1 && divisor.value_type == s21_usual ? 1 : 0;
+    // int divsr_is_normal_minus = s21_is_less(divisor, zero) == 1 &&
+    // divisor.value_type == s21_usual ? 1 : 0;
+    int divsr_is_normal_minus = s21_is_less(divisor, zero) == 1 && !s21_check_inf(divisor) ? 1 : 0;
 
     int flag = 1;  // для отлова ситуации с normal/+-inf
 
@@ -868,7 +902,7 @@ int s21_div(s21_decimal divident, s21_decimal divisor, s21_decimal *result) {
 
     if (s21_check_inf(*result)) {
         ret = 1;
-        if (s21_getsign(result)) ret = 2;
+        if (s21_getsign(&divident) != s21_getsign(&divisor)) ret = 2;
     }
     if (s21_is_equal(divisor, zero)) ret = 3;
     return ret;
