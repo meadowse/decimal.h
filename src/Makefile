@@ -1,15 +1,15 @@
-CC=gcc
-CFLAGS=-std=c11 -Wall -Werror -Wextra -g
-SOURCES=s21_decimal.c
-OBJECTS=$(SOURCES:.c=.o)
+CC = gcc
+CFLAGS = -std=c11 -Wall -Werror -Wextra -g
+SOURCES = s21_decimal.c
+OBJECTS = $(SOURCES:.c=.o)
 OS = $(shell uname)
 TEST_FILE_NAME = test.c
 TEST_FILE_NAME2 = test2.c
 
 ifeq ($(OS), Darwin)
-	TEST_LIBS=-lcheck
+	TEST_LIBS = -lcheck
 else
-	TEST_LIBS=-lcheck -lsubunit -pthread -lrt -lm
+	TEST_LIBS = -lcheck -lsubunit -pthread -lrt -lm
 endif
 
 all: gcov_report
@@ -40,22 +40,23 @@ install lcov:
 
 check: test
 	cppcheck --enable=all --suppress=missingIncludeSystem --inconclusive --check-config *.c *.h
-#	cp ../materials/linters/CPPLINT.cfg .
+	cp ../materials/linters/.clang-format .
 #	python3 ../materials/linters/cpplint.py --extension=c *.c *.h
-#	rm -rf CPPLINT.cfg
+	clang-format -i *.c *.h
 	clang-format -n *.c *.h
 	make test
 
 # style: test
-# 	cp ../../materials/linters/CPPLINT.cfg ./
+# 	cp ../../materials/linters/.clang-format .
 # 	python3 ./../../materials/linters/cpplint.py --extensions=c *.c *.h
-# 	rm -f CPPLINT.cfg  
+#	clang-format -i *.c *.h
+#	clang-format -n *.c *.h
 
 open:
 	open report/index.html
 
 ifeq ($(OS), Darwin)
-	leaks --atExit -- test
+	leaks -atExit -- test
 else
 	CK_FORK=no valgrind --vgdb=no --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=RESULT_VALGRIND.txt ./test
 endif

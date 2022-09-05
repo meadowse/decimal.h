@@ -15,13 +15,13 @@
 // } s21_value_type;
 
 typedef struct {
-    int bits[4];
-    // s21_value_type value_type;
+  int bits[4];
+  // s21_value_type value_type;
 } s21_decimal;
 
 typedef union {
-    int in;
-    float fl;
+  int in;
+  float fl;
 } int_float;
 
 int s21_add(s21_decimal, s21_decimal, s21_decimal *);
